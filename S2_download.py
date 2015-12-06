@@ -18,9 +18,6 @@ class OptionParser (optparse.OptionParser):
 ###########################################################################
 
 url_search="https://scihub.esa.int/apihub/search?q="
-url_download="https://scihub.esa.int/apihub/"
-#user="hagolle"
-#pwd="seriestemporelles"
 
 #==================
 #parse command line
