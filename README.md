@@ -10,3 +10,5 @@ You can select by :
 Here are a few examples :
 - To download all the products over Toulouse
 `python  %s --lat 43.6 --lon 1.44 -a apihub.txt (scene)"%sys.argv[0]`
+
+If your download stops for a network issue, you can restart S2-download, as wget knows how to resume without havind to download everything again.
