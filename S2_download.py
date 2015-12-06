@@ -37,7 +37,7 @@ else:
     parser.add_option("--lon", dest="lon", action="store", type="float", \
             help="longitude in decimal degrees")
     parser.add_option("-d", "--start_date", dest="start_date", action="store", type="string", \
-            help="start date, fmt('2015-12-222')",default=None)
+            help="start date, fmt('2015-12-22')",default=None)
     parser.add_option("-f","--end_date", dest="end_date", action="store", type="string", \
             help="end date, fmt('2015-12-23')",default=None)
     parser.add_option("-o","--orbit", dest="orbit", action="store", type="int", \
@@ -46,6 +46,8 @@ else:
             help="ESA apihub account and password file")
     parser.add_option("-p","--proxy_passwd", dest="proxy", action="store", type="string", \
             help="Proxy account and password file",default=None)
+    parser.add_option("-n","--no_download", dest="no_download", action="store_true",  \
+            help="Do not download products, just print wget command",default=False)
 
 
     (options, args) = parser.parse_args()
@@ -88,11 +90,11 @@ else :
 if options.start_date!=None:    
     start_date=options.start_date+"T00:00:00.000Z"
     if options.end_date!=None:
-        end_date=options.end_date+"T00:00:00.000Z"
+        end_date=options.end_date+"T23:59:50.000Z"
     else:
         end_date="NOW"
 
-    query_date=" ingestiondate:[%s TO %s]"%(start_date,start_date)
+    query_date=" ingestiondate:[%s TO %s]"%(start_date,end_date)
     query=query+query_date
 
 commande_wget='%s %s %s "%s%s"'%(wg,auth,search_output,url_search,query)
@@ -136,29 +138,6 @@ for prod in products:
     #==================================download product
     commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,filename+".zip",link)
     print commande_wget
-    os.system(commande_wget)
+    if options.no_download==False:
+        os.system(commande_wget)
 
-
-"""
-  
-
-https://scihub.esa.int/dhus/odata/v1/Products?$format=xml
-https://scihub.esa.int/apihub/odata/v1/Products?$format=xml
-
-https://scihub.esa.int/apihub/odata/v1/Products?$format=xml
-
-https://scihub.copernicus.eu/s2/odata/v1/Products(%27ca9c4480-55ef-4df1-b400-fa58fae08927%27)/$value
-
-https://scihub.esa.int/apihub/odata/v1/Products?$orderby=IngestionDate%20desc&$top=100
-
-https://scihub.esa.int/apihub/odata/v1/Products?$filter=year(ContentDate/Start) eq 2015 and month(ContentDate/Start) eq 12 and day(ContentDate/Start) eq 03
-
-https://scihub.esa.int/apihun/search?q=S2 AND orbitnumber:051
-
-https://scihub.esa.int/apihub/search?q=filename:S2A*20151203*R051*
-https://scihub.esa.int/apihub/search?q=footprint:"Intersects(43.6000, 1.44)" filename:S2A*
-
-https://scihub.esa.int/apihub/odata/v1/Products(%27c90770da-dba6-4129-89dc-1abb1d873bee%27)/$metadata
-
-
-"""
