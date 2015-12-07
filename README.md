@@ -9,6 +9,8 @@ You can select by :
 - path number (sometimes, a point can be observed from several paths
 - date, of course
 
+To use it, you need wget installed. I guess it goes with any linux distribution. For windows, I don't know, but maybe someone can tell.
+
 ### Proxy
 In case your download must be done through a proxy, you have to setup the https_proxy variable in your.bashrc file or in your .profile.
 
