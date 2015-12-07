@@ -57,8 +57,10 @@ else:
             help="Proxy account and password file",default=None)
     parser.add_option("-n","--no_download", dest="no_download", action="store_true",  \
             help="Do not download products, just print wget command",default=False)
-    parser.add_option("-m","--max_cloud", dest="max_cloud", action="store",type=float,  \
+    parser.add_option("-m","--max_cloud", dest="max_cloud", action="store",type="float",  \
             help="Do not download products with more cloud percentage ",default=110)
+    parser.add_option("-w","--write_dir", dest="write_dir", action="store",type="string",  \
+            help="Path where the products should be downloaded",default='.')
 
 
     (options, args) = parser.parse_args()
@@ -165,7 +167,7 @@ for prod in products:
 
     #==================================download product
     if cloud<options.max_cloud :
-        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,filename+".zip",link)
+        commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
         print commande_wget
         if options.no_download==False:
             os.system(commande_wget)
