@@ -33,9 +33,18 @@ else:
     usage = "usage: %prog [options] "
     parser = OptionParser(usage=usage)
     parser.add_option("--lat", dest="lat", action="store", type="float", \
-            help="latitude in decimal degrees")
+            help="latitude in decimal degrees",default=None)
     parser.add_option("--lon", dest="lon", action="store", type="float", \
-            help="longitude in decimal degrees")
+            help="longitude in decimal degrees",default=None)
+    parser.add_option("--latmin", dest="latmin", action="store", type="float", \
+            help="min latitude in decimal degrees",default=None)
+    parser.add_option("--latmax", dest="latmax", action="store", type="float", \
+            help="max latitude in decimal degrees",default=None)
+    parser.add_option("--lonmin", dest="lonmin", action="store", type="float", \
+            help="min longitude in decimal degrees",default=None)
+    parser.add_option("--lonmax", dest="lonmax", action="store", type="float", \
+            help="max longitude in decimal degrees",default=None)
+
     parser.add_option("-d", "--start_date", dest="start_date", action="store", type="string", \
             help="start date, fmt('2015-12-22')",default=None)
     parser.add_option("-f","--end_date", dest="end_date", action="store", type="string", \
@@ -48,14 +57,25 @@ else:
             help="Proxy account and password file",default=None)
     parser.add_option("-n","--no_download", dest="no_download", action="store_true",  \
             help="Do not download products, just print wget command",default=False)
+    parser.add_option("-m","--max_cloud", dest="max_cloud", action="store",type=float,  \
+            help="Do not download products with more cloud percentage ",default=110)
 
 
     (options, args) = parser.parse_args()
-    parser.check_required("--lat")
-    parser.check_required("--lon")        
+    if options.lat==None or options.lon==None:
+        if options.latmin==None or options.lonmin==None or options.latmax==None or options.lonmax==None:
+            print "provide at least a point or  rectangle"
+            sys.exit(-1)
+        else:
+            geom='rectangle'
+    else:
+        if options.latmin==None and options.lonmin==None and options.latmax==None and options.lonmax==None:
+            geom='point'
+        else:
+            print "please choose between point and rectance, but not both"
+            sys.exit(-1)
+            
     parser.check_required("-a")        
-
-
 
 #====================
 # read password file
@@ -81,10 +101,17 @@ auth='--user="%s" --password="%s"'%(account,passwd)
 search_output="--output-document=query_results.xml"
 
 
+
+if geom=='point':
+    query_geom='footprint:\\"Intersects(%f,%f)\\"'
+elif geom=='rectangle':
+    query_geom='footprint:\\"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))\\"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
+    
+
 if options.orbit==None:
-    query='footprint:\\"Intersects(%f,%f)\\" filename:S2A*'%(options.lat,options.lon)
+    query='%s filename:S2A*'%(query_geom)
 else :
-    query='footprint:\\"Intersects(%f,%f)\\" filename:S2A*R%03d*'%(options.lat,options.lon,options.orbit)
+    query='%s filename:S2A*R%03d*'%(query_geom,options.orbit)
 
 
 if options.start_date!=None:    
@@ -101,6 +128,7 @@ commande_wget='%s %s %s "%s%s"'%(wg,auth,search_output,url_search,query)
 print commande_wget
 os.system(commande_wget)
 
+"Intersects(POLYGON((-4.53 29.85, 26.75 29.85, 26.75 46.80,-4.53 46.80,-4.53 29.85)))"
 
 #=======================
 # parse catalog output
@@ -125,19 +153,22 @@ for prod in products:
     for node in prod.getElementsByTagName("double"):
         (name,value)=node.attributes.items()[0]
         if value=="cloudcoverpercentage":
-            cloud=str(node.toxml()).split('>')[1].split('<')[0]
+            cloud=float((node.toxml()).split('>')[1].split('<')[0])
 
     print "==============================================="
     print filename        
     print link
-    print "cloud percentage = %5.2f %%",cloud
+    print "cloud percentage = %5.2f %%"%cloud
     print "date de prise de vue",datatakeid
     print "==============================================="
   
 
     #==================================download product
-    commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,filename+".zip",link)
-    print commande_wget
-    if options.no_download==False:
-        os.system(commande_wget)
+    if cloud<options.max_cloud :
+        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,filename+".zip",link)
+        print commande_wget
+        if options.no_download==False:
+            os.system(commande_wget)
 
+    else :
+        print "too many clouds to download this product" 
