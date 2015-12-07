@@ -1,5 +1,5 @@
 # S2-download
-##Desciption
+### Description
 Tool to download Sentinel-2 L1C data from ESA (through wget)
 (http://olivierhagolle.github.io/Sentinel-2-download)
 
@@ -9,12 +9,18 @@ You can select by :
 - path number (sometimes, a point can be observed from several paths
 - date, of course
 
-## Proxy
-In case your download must be done through a proxy, you have to setup the https_proxy variable in your.bashrc file or in your .profile
+### Proxy
+In case your download must be done through a proxy, you have to setup the https_proxy variable in your.bashrc file or in your .profile.
 
-`https_proxy = http://uname:passwd@proxy.blah.fr:8080`
+Proxy with password :
 
-## Examples
+`export https_proxy = http://uname:passwd@proxy.blah.fr:8080`
+
+Proxy without password :
+
+`export https_proxy = http://uname:passwd@proxy.blah.fr:8080`
+
+### Examples
 Here are a few examples :
 - To download all the products over Toulouse
 
