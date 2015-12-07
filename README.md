@@ -1,5 +1,6 @@
 # S2-download
 Tool to download Sentinel-2 L1C data from ESA (through wget)
+(http://olivierhagolle.github.io/Sentinel-2-download)
 
 This module searches the ESA apihub catalog and downloads the products which fit the criteria defined in the command line.
 You can select by :
