@@ -14,11 +14,11 @@ In case your download must be done through a proxy, you have to setup the https_
 
 Proxy with password :
 
-`export https_proxy = http://uname:passwd@proxy.blah.fr:8080`
+`export https_proxy = http://uname:passwd@proxy.truc.fr:8080`
 
 Proxy without password :
 
-`export https_proxy = http://uname:passwd@proxy.blah.fr:8080`
+`export https_proxy = http://uname:passwd@proxy.truc.fr:8080`
 
 ### Examples
 Here are a few examples :
@@ -43,6 +43,7 @@ Here are a few examples :
 `python  S2_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06`
 
 - you may also change the output directory with the -w option
+- 
 `python  S2_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/`
 
 If your download stops for a network issue, you can restart S2-download, as wget knows how to resume without havind to download everything again. Wget doesnot download the products already fully downloaded (unlesss you have unzipped them).
