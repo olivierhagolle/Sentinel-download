@@ -103,7 +103,7 @@ search_output="--output-document=query_results.xml"
 
 
 if geom=='point':
-    query_geom='footprint:\\"Intersects(%f,%f)\\"'
+    query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
 elif geom=='rectangle':
     query_geom='footprint:\\"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))\\"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
     
