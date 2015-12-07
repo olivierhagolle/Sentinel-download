@@ -169,7 +169,9 @@ for prod in products:
     if cloud<options.max_cloud :
         commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
         print commande_wget
-        if options.no_download==False:
+        #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
+        unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
+        if unzipped_file_exists==False or options.no_download==False:
             os.system(commande_wget)
 
     else :
