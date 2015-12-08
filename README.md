@@ -13,6 +13,7 @@ This tool was written thanks to ESA well documented scihub API : https://scihub.
 
 ### wget
 To use it, you need *wget* installed. I guess it goes with any linux distribution. For windows, I don't know, but maybe someone can tell.
+If your download stops for a network issue, you can restart S2-download, as wget knows how to resume without havind to download everything again. Wget doesnot download the products already fully downloaded (unlesss you have unzipped them).
 
 ### Proxy
 In case your download must be done through a proxy, you have to setup the https_proxy variable in your.bashrc file or in your .profile.
@@ -52,12 +53,12 @@ Here are a few examples for Sentinel-2
 
 `python  Sentinel_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/ -s S2`
 
-#### Sentinel-1 examples :
+#### S1 examples :
 - To download Sentinel-1 SLC products above a rectangle in France 
 
 
 `python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt   -n -s S1A*SLC`
 
-- for other exmaples see Sentinel-2 exmaples
+- for other examples see Sentinel-2 examples
 
-If your download stops for a network issue, you can restart S2-download, as wget knows how to resume without havind to download everything again. Wget doesnot download the products already fully downloaded (unlesss you have unzipped them).
+
