@@ -1,6 +1,6 @@
-# S2-download
+# Sentinel-download
 ### Description
-Tool to download Sentinel-2 L1C data from ESA (through wget)
+Tool to download Sentinel data from ESA (through wget)
 (http://olivierhagolle.github.io/Sentinel-2-download)
 
 This module searches the ESA apihub catalog and downloads the products which fit the criteria defined in the command line.
@@ -26,29 +26,38 @@ Proxy without password :
 `export https_proxy = http://uname:passwd@proxy.truc.fr:8080`
 
 ### Examples
-Here are a few examples :
+#### S2 examples
+Here are a few examples for Sentinel-2
 - To download all the products over Toulouse
 
 `python  %s --lat 43.6 --lon 1.44 -a apihub.txt (scene)"%sys.argv[0]`
 
 - To download all products over Toulouse taken from Path 51
 
-`python  S2_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 `
+`python  Sentinel_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
 
 - To see all products over Toulouse taken from Path 51, but without downloading, thanks to -n option
 
-`python  S2_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 -n `
+`python  Sentinel_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 -n -s S2`
 
 - To see all products in a rectangle and download only those with a small percentage of clouds :
 
-`python  S2_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt -o 94 -m 23 -d 2015-12-06 -n`
+`python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt -o 94 -m 23 -d 2015-12-06 -n -s S2`
 
 - to download al products above Toulouse downlaoded after 2015-12-06
 
-`python  S2_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06`
+`python  Sentinel_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -s S2`
 
 - you may also change the output directory with the -w option
 
-`python  S2_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/`
+`python  Sentinel_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/ -s S2`
+
+#### Sentinel-1 examples :
+- To download Sentinel-1 SLC products above a rectangle in France 
+
+
+`python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt   -n -s S1A*SLC`
+
+- for other exmaples see Sentinel-2 exmaples
 
 If your download stops for a network issue, you can restart S2-download, as wget knows how to resume without havind to download everything again. Wget doesnot download the products already fully downloaded (unlesss you have unzipped them).
