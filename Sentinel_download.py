@@ -61,6 +61,8 @@ else:
             help="Do not download products with more cloud percentage ",default=110)
     parser.add_option("-w","--write_dir", dest="write_dir", action="store",type="string",  \
             help="Path where the products should be downloaded",default='.')
+    parser.add_option("-s","--sentinel", dest="sentinel", action="store",type="string",  \
+            help="Sentinel mission considered",default='S2')
 
 
     (options, args) = parser.parse_args()
@@ -111,9 +113,9 @@ elif geom=='rectangle':
     
 
 if options.orbit==None:
-    query='%s filename:S2A*'%(query_geom)
+    query='%s filename:%s*'%(query_geom,options.sentinel)
 else :
-    query='%s filename:S2A*R%03d*'%(query_geom,options.orbit)
+    query='%s filename:%s*R%03d*'%(query_geom,options.sentinel,options.orbit)
 
 
 if options.start_date!=None:    
@@ -149,29 +151,31 @@ for prod in products:
         (name,value)=node.attributes.items()[0]
         if value=="filename":
             filename= str(node.toxml()).split('>')[1].split('<')[0]   #ugly, but minidom is not straightforward
-        elif value=="s2datatakeid":
-            datatakeid=str(node.toxml()).split('>')[1].split('<')[0]
 
-    for node in prod.getElementsByTagName("double"):
-        (name,value)=node.attributes.items()[0]
-        if value=="cloudcoverpercentage":
-            cloud=float((node.toxml()).split('>')[1].split('<')[0])
-
-    print "==============================================="
+    #print what has been found
+    print "\n==============================================="
     print filename        
     print link
-    print "cloud percentage = %5.2f %%"%cloud
-    print "date de prise de vue",datatakeid
-    print "==============================================="
+
+    if options.sentinel.find("S2") >=0 :
+        for node in prod.getElementsByTagName("double"):
+            (name,value)=node.attributes.items()[0]
+            if value=="cloudcoverpercentage":
+                cloud=float((node.toxml()).split('>')[1].split('<')[0])
+            print "cloud percentage = %5.2f %%"%cloud
+    else:
+        cloud=0
+    print "===============================================\n"
+
   
 
     #==================================download product
-    if cloud<options.max_cloud :
+    if cloud<options.max_cloud or options.sentinel.find("S2")==-1:
         commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
         print commande_wget
         #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
         unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
-        if unzipped_file_exists==False or options.no_download==False:
+        if unzipped_file_exists==False and options.no_download==False:
             os.system(commande_wget)
 
     else :
