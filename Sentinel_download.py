@@ -172,7 +172,6 @@ for prod in products:
     #==================================download product
     if cloud<options.max_cloud or options.sentinel.find("S2")==-1:
         commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
-        print commande_wget
         #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
         unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
         if unzipped_file_exists==False and options.no_download==False:
