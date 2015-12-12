@@ -17,7 +17,7 @@ class OptionParser (optparse.OptionParser):
  
 ###########################################################################
 
-url_search="https://scihub.esa.int/apihub/search?q="
+url_search="https://scihub.copernicus.eu/apihub/search?q="
 
 #==================
 #parse command line
