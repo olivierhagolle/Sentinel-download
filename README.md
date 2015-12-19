@@ -26,7 +26,7 @@ Proxy with password :
 
 Proxy without password :
 
-`export https_proxy = http://uname:passwd@proxy.truc.fr:8080`
+`export https_proxy = http://proxy.truc.fr:8080`
 
 ### Examples
 #### S2 examples
@@ -62,5 +62,9 @@ Here are a few examples for Sentinel-2
 `python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt   -n -s S1A*SLC`
 
 - for other examples see Sentinel-2 examples
+
+#### authentification
+The scihub site accepts the "guest" account and "guest" password, as provided in the `apihub.txt` file. But only two downloads at the same time are allowed worldwide on the same account. So do not forget to enter your own account and password in the password file provided in the -a option.
+
 
 
