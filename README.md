@@ -67,4 +67,6 @@ Here are a few examples for Sentinel-2
 The scihub site accepts the "guest" account and "guest" password, as provided in the `apihub.txt` file. But only two downloads at the same time are allowed worldwide on the same account. So do not forget to enter your own account and password in the password file provided in the -a option.
 
 
+However, please also note that ESA has currently limited the acces to the early registrated users : 
 
+        The API Hub Access is currently available only for users registered before the 20th of November 12:00 UTC, the user credentials as of the 20th November are valid to access this site.
