@@ -70,7 +70,9 @@ The scihub site accepts the "guest" account and "guest" password, as provided in
 However, please also note that ESA has currently limited the acces to users registered some time ago.
 
 In December :
+
         The API Hub Access is currently available only for users registered before the 20th of November 12:00 UTC, the user credentials as of the 20th November are valid to access this site.
+        
 In January :
         The API Hub Access is currently available only for users registered on SciHub before the 21st of December 16:46 UTC. The same user credentials are valid to access this site.
 
