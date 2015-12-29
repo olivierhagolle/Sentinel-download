@@ -47,7 +47,7 @@ Here are a few examples for Sentinel-2
 
 `python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt -o 94 -m 23 -d 2015-12-06 -n -s S2`
 
-- to download al products above Toulouse downlaoded after 2015-12-06
+- to download all products above Toulouse downloaded after 2015-12-06
 
 `python  Sentinel_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -s S2`
 
@@ -67,6 +67,10 @@ Here are a few examples for Sentinel-2
 The scihub site accepts the "guest" account and "guest" password, as provided in the `apihub.txt` file. But only two downloads at the same time are allowed worldwide on the same account. So do not forget to enter your own account and password in the password file provided in the -a option.
 
 
-However, please also note that ESA has currently limited the acces to the early registrated users : 
+However, please also note that ESA has currently limited the acces to users registered some time ago.
 
+In December :
         The API Hub Access is currently available only for users registered before the 20th of November 12:00 UTC, the user credentials as of the 20th November are valid to access this site.
+In January :
+        The API Hub Access is currently available only for users registered on SciHub before the 21st of December 16:46 UTC. The same user credentials are valid to access this site.
+
