@@ -1,7 +1,7 @@
 # Sentinel-download
 ### Description
 Tool to download Sentinel data from ESA (through wget)
-(http://olivierhagolle.github.io/Sentinel-2-download)
+(http://olivierhagolle.github.io/Sentinel-download)
 
 The ESA Sentinel distribution website allows you to perform catalog searches through http requests. This blog post shows [a few examples](http://www.cesbio.ups-tlse.fr/multitemp/?p=6419). 
 
