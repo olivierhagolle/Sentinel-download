@@ -16,6 +16,33 @@ class OptionParser (optparse.OptionParser):
           self.error("%s option not supplied" % option)
  
 ###########################################################################
+def get_granule_name(xml_file,tile):
+    #extract the granule name
+
+    #the xml file is not correct, minidom.parse does not work. It should be corrected one day
+    
+    ## xml=minidom.parse(xml_file)
+    ## granule_info=xml.getElementsByTagName("entry")
+    ## for gr in products:
+    ##     granule_name=gr.getElementsByTagName("title")[0].firstChild.data
+    ##     if granule_name.find(tile):
+    ##         print granule_name
+
+    #parse xml using strings (temporary)
+
+    with open(xml_file) as fic:
+        line=fic.readlines()[0].split('<entry>')
+        for fragment in line[1:]:
+            name=fragment.split('<title')[1].split('>')[1].split('<')[0]
+            if (name.find(tile)>0):
+                granule_name=name
+                print "*******>",granule_name
+    os.remove(xml_file)
+    return granule_name
+##########################################################################
+
+
+
 
 url_search="https://scihub.copernicus.eu/apihub/search?q="
 
@@ -27,7 +54,8 @@ if len(sys.argv) == 1:
     print '      '+sys.argv[0]+' [options]'
     print "     Aide : ", prog, " --help"
     print "        ou : ", prog, " -h"
-    print "example python  %s --lat 43.6 --lon 1.44 -a apihub.txt (scene)"%sys.argv[0]
+    print "example python  %s --lat 43.6 --lon 1.44 -a apihub.txt "%sys.argv[0]
+    print "example python  %s --lat 43.6 --lon 1.44 -a apihub.txt -t 31TCJ "%sys.argv[0]
     sys.exit(-1)
 else:
     usage = "usage: %prog [options] "
@@ -63,6 +91,8 @@ else:
             help="Path where the products should be downloaded",default='.')
     parser.add_option("-s","--sentinel", dest="sentinel", action="store",type="string",  \
             help="Sentinel mission considered",default='S2')
+    parser.add_option("-t","--tile", dest="tile", action="store",type="string",  \
+            help="Sentinel-2 Tile number",default=None)
 
 
     (options, args) = parser.parse_args()
@@ -91,7 +121,7 @@ try:
         passwd=passwd[:-1]
     f.close()
 except :
-    print "error with usgs password file"
+    print "error with password file"
     sys.exit(-2)
 
 			
@@ -132,7 +162,6 @@ commande_wget='%s %s %s "%s%s"'%(wg,auth,search_output,url_search,query)
 print commande_wget
 os.system(commande_wget)
 
-"Intersects(POLYGON((-4.53 29.85, 26.75 29.85, 26.75 46.80,-4.53 46.80,-4.53 29.85)))"
 
 #=======================
 # parse catalog output
@@ -170,12 +199,25 @@ for prod in products:
   
 
     #==================================download product
-    if cloud<options.max_cloud or options.sentinel.find("S2")==-1:
+    if( cloud<options.max_cloud or (options.sentinel.find("S1")>=0)) and options.tile==None:
         commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
         #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
         unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
         if unzipped_file_exists==False and options.no_download==False:
             os.system(commande_wget)
 
+    elif options.tile!=None:
+        #retrieve list of granules
+        url=link.replace('\$value',"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
+        print url
+        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granules.xml',url)
+        os.system(commande_wget)
+        granule=get_granule_name('granules.xml',options.tile)
+        print granule
+        # download granule:
+        url="%s('%s')/\\$value"%(url,granule)
+        commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,granule+".zip",url)
+        os.system(commande_wget)
+        
     else :
         print "too many clouds to download this product" 
