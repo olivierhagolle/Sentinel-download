@@ -93,6 +93,8 @@ else:
             help="Sentinel mission considered",default='S2')
     parser.add_option("-t","--tile", dest="tile", action="store",type="string",  \
             help="Sentinel-2 Tile number",default=None)
+    parser.add_option("--dhus",dest="dhus",action="store_true",  \
+            help="Try dhus interface when apihub is not working",default=False)
 
 
     (options, args) = parser.parse_args()
@@ -185,6 +187,8 @@ for prod in products:
     print "\n==============================================="
     print filename        
     print link
+    if options.dhus==True:
+        link=link.replace("apihub","dhus")
 
     if options.sentinel.find("S2") >=0 :
         for node in prod.getElementsByTagName("double"):
@@ -203,6 +207,7 @@ for prod in products:
         commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
         #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
         unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
+        print commande_wget
         if unzipped_file_exists==False and options.no_download==False:
             os.system(commande_wget)
 
