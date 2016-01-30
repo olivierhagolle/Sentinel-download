@@ -70,9 +70,21 @@ The scihub site accepts the "guest" account and "guest" password, as provided in
 However, please also note that ESA has currently limited the acces to users registered some time ago.
 
 In December :
-
-        The API Hub Access is currently available only for users registered before the 20th of November 12:00 UTC, the user credentials as of the 20th November are valid to access this site.
+`The API Hub Access is currently available only for users registered before the 20th of November 12:00 UTC, the user credentials as of the 20th November are valid to access this site.`
         
 In January :
-        The API Hub Access is currently available only for users registered on SciHub before the 21st of December 16:46 UTC. The same user credentials are valid to access this site.
+` The API Hub Access is currently available only for users registered on SciHub before the 21st of December 16:46 UTC. The same user credentials are valid to access this site.`
+
+#### Issues
+- The -t option to retrieve only one tile, intead of the whole product does not work, I do not know why, if someone finds out, please let me know
+- One of my account always yields the same message :
+`wget --no-check-certificate --user="hagolle" --password="very_secret" --continue --output-document=./S2A_OPER_PRD_MSIL1C_PDMC_20160119T202641_R008_V20160119T105107_20160119T105107.SAFE.zip "https://scihub.copernicus.eu/apihub/odata/v1/Products('bcf1f9a1-c43d-4e2d-8924-f90662acdc49')/\$value"
+> 2016-01-30 17:09:02 ERREUR 500: Internal Server Error. `
+
+If I use the URL in firefox, I get the following message, which is not true, I have no other download on-going.
+
+`<error><code/><message xml:lang="en">An exception occured while creating a stream : Maximum number of 2 concurrent flows achieved by the user "hagolle"</message></error>`
+
+I have found a workaround with the -dhus option.
+
 
