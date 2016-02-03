@@ -59,7 +59,7 @@ Here are a few examples for Sentinel-2
 - To download Sentinel-1 SLC products above a rectangle in France 
 
 
-`python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt   -n -s S1A*SLC`
+`python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt    -s S1A*SLC`
 
 - for other examples see Sentinel-2 examples
 
