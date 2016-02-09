@@ -11,7 +11,9 @@ You can select by :
 - path number (sometimes, a point can be observed from several paths
 - date, of course
 
-This tool was written thanks to ESA well documented scihub API : https://scihub.esa.int/userguide/5APIsAndBatchScripting
+This tool was written thanks to ESA well documented scihub API : https://scihub.esa.int/userguide/5APIsAndBatchScripting.
+
+To use this tool, you need a scihub account obtained a long time in advance (see below). If you do not have such an account, you might consider downloading the products from the [French collaborative ground segment PEPS](https://github.com/olivierhagolle/peps_download).
 
 ### wget
 To use it, you need *wget* installed. I guess it goes with any linux distribution. For windows, I don't know, but maybe someone can tell.
@@ -74,6 +76,8 @@ In December :
         
 In January :
 ` The API Hub Access is currently available only for users registered on SciHub before the 21st of December 16:46 UTC. The same user credentials are valid to access this site.`
+
+If you do not have such an account, you might consider downloading the products from the [French collaborative ground segment PEPS](https://github.com/olivierhagolle/peps_download).
 
 #### Issues
 ##### Tiles download
