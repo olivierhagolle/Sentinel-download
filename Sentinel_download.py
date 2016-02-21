@@ -95,6 +95,8 @@ else:
             help="Sentinel-2 Tile number",default=None)
     parser.add_option("--dhus",dest="dhus",action="store_true",  \
             help="Try dhus interface when apihub is not working",default=False)
+    parser.add_option("-r",dest="MaxRecords",action="store",type="int",  \
+            help="maximum number of records to download (default=100)",default=100)
 
 
     (options, args) = parser.parse_args()
@@ -160,7 +162,7 @@ if options.start_date!=None:
     query_date=" ingestiondate:[%s TO %s]"%(start_date,end_date)
     query=query+query_date
 
-commande_wget='%s %s %s "%s%s"'%(wg,auth,search_output,url_search,query)
+commande_wget='%s %s %s "%s%s&rows=%d"'%(wg,auth,search_output,url_search,query,options.MaxRecords)
 print commande_wget
 os.system(commande_wget)
 
