@@ -1,7 +1,6 @@
 # Sentinel-download
 ### Description
-Tool to download Sentinel data from ESA (through wget)
-(http://olivierhagolle.github.io/Sentinel-download)
+Tool to download Sentinel data from ESA (through wget). This tool can download whole products or only one tile per product, with the -t option (http://olivierhagolle.github.io/Sentinel-download).
 
 The ESA Sentinel distribution website allows you to perform catalog searches through http requests. This blog post shows [a few examples](http://www.cesbio.ups-tlse.fr/multitemp/?p=6419). 
 
@@ -13,7 +12,7 @@ You can select by :
 
 This tool was written thanks to ESA well documented scihub API : https://scihub.esa.int/userguide/5APIsAndBatchScripting.
 
-To use this tool, you need a scihub account obtained a long time in advance (see below). If you do not have such an account, you might consider downloading the products from the [French collaborative ground segment PEPS](https://github.com/olivierhagolle/peps_download).
+To use this tool, you need a scihub account obtained a long time in advance (see below). If you do not have such an account, or if you want to try a faster access, you might consider downloading the products from the [French collaborative ground segment PEPS](https://github.com/olivierhagolle/peps_download).
 
 ### wget
 To use it, you need *wget* installed. I guess it goes with any linux distribution. For windows, I don't know, but maybe someone can tell.
@@ -57,6 +56,9 @@ Here are a few examples for Sentinel-2
 
 `python  Sentinel_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/ -s S2`
 
+- and finally, you may download only one tile from the product (the one which contains Toulouse for instance)
+`python  Sentinel_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 -t 31TCJ`
+
 #### S1 examples :
 - To download Sentinel-1 SLC products above a rectangle in France 
 
@@ -80,8 +82,7 @@ In January :
 If you do not have such an account, you might consider downloading the products from the [French collaborative ground segment PEPS](https://github.com/olivierhagolle/peps_download).
 
 #### Issues
-##### Tiles download
-The -t option to retrieve only one tile, intead of the whole product does not work, I do not know why, if someone finds out, please let me know
+
 ##### Maximum of concurrent flows
 - One of my accounts always yields the same message :
 `wget --no-check-certificate --user="hagolle" --password="very_secret" --continue --output-document=./S2A_OPER_PRD_MSIL1C_PDMC_20160119T202641_R008_V20160119T105107_20160119T105107.SAFE.zip "https://scihub.copernicus.eu/apihub/odata/v1/Products('bcf1f9a1-c43d-4e2d-8924-f90662acdc49')/\$value"
