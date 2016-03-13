@@ -38,11 +38,11 @@ Here are a few examples for Sentinel-2
 
 - To download all products over Toulouse taken from Path 51
 
-`python  Sentinel_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
 
 - To see all products over Toulouse taken from Path 51, but without downloading, thanks to -n option
 
-`python  Sentinel_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 -n -s S2`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -n -s S2`
 
 - To see all products in a rectangle and download only those with a small percentage of clouds :
 
@@ -50,14 +50,14 @@ Here are a few examples for Sentinel-2
 
 - to download all products above Toulouse downloaded after 2015-12-06
 
-`python  Sentinel_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -s S2`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -s S2`
 
 - you may also change the output directory with the -w option
 
-`python  Sentinel_download.py --lat 46.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/ -s S2`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/ -s S2`
 
 - and finally, you may download only one tile from the product (the one which contains Toulouse for instance)
-`python  Sentinel_download.py --lat 41.6 --lon 1.44 -a apihub.txt -o 51 -t 31TCJ`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -t 31TCJ`
 
 #### S1 examples :
 - To download Sentinel-1 SLC products above a rectangle in France 
