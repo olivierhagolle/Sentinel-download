@@ -16,29 +16,40 @@ class OptionParser (optparse.OptionParser):
           self.error("%s option not supplied" % option)
  
 ###########################################################################
-def get_granule_name(xml_file,tile):
-    #extract the granule name
 
-    #the xml file is not correct, minidom.parse does not work. It should be corrected one day
-    
-    ## xml=minidom.parse(xml_file)
-    ## granule_info=xml.getElementsByTagName("entry")
-    ## for gr in products:
-    ##     granule_name=gr.getElementsByTagName("title")[0].firstChild.data
-    ##     if granule_name.find(tile):
-    ##         print granule_name
 
-    #parse xml using strings (temporary)
-
+#get URL, name and type within xml file from Scihub
+def get_elements(xml_file):
+    urls=[]
+    contentType=[]
+    name=[]
     with open(xml_file) as fic:
         line=fic.readlines()[0].split('<entry>')
         for fragment in line[1:]:
-            name=fragment.split('<title')[1].split('>')[1].split('<')[0]
-            if (name.find(tile)>0):
-                granule_name=name
-                print "*******>",granule_name
+            urls.append(fragment.split('<id>')[1].split('</id>')[0])
+            contentType.append(fragment.split('<d:ContentType>')[1].split('</d:ContentType>')[0])
+            name.append(fragment.split('<title type="text">')[1].split('</title>')[0])
+            #print name
     os.remove(xml_file)
-    return granule_name
+    return urls,contentType,name
+
+# recursively download file tree of a Granule
+def download_tree(rep,xml_file,wg,auth):
+    urls,types,names=get_elements(xml_file)
+    for i in range(len(urls)):
+        if types[i]=='Item':
+            nom_rep="%s/%s"%(rep,names[i])
+            if not(os.path.exists(nom_rep)):
+                os.mkdir(nom_rep)
+            commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'files.xml',urls[i]+"/Nodes")
+            print commande_wget
+            os.system(commande_wget)
+            download_tree(nom_rep,'files.xml',wg,auth)
+        else:                       
+            commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,rep+'/'+names[i],urls[i]+'/\\$value')
+            os.system(commande_wget)           
+
+
 ##########################################################################
 
 
@@ -112,7 +123,10 @@ else:
         else:
             print "please choose between point and rectance, but not both"
             sys.exit(-1)
-            
+    if options.tile!=None and options.sentinel!='S2':
+        print "The tile option (-t) can only be used for Sentinel-2"
+        sys.exit(-1)
+        
     parser.check_required("-a")        
 
 #====================
@@ -213,18 +227,48 @@ for prod in products:
         if unzipped_file_exists==False and options.no_download==False:
             os.system(commande_wget)
 
+    # download only one tile, file by file.        
     elif options.tile!=None:
+        #find URL of header file
+        url_file_dir=link.replace('\$value',"Nodes('%s')/Nodes"%(filename))
+        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'file_dir.xml',url_file_dir)
+        os.system(commande_wget)
+        urls,types,names=get_elements('file_dir.xml')
+        #search for the xml file
+        for i in range(len(urls)):
+            if names[i].find('SAFL1C')>0:
+                xml=names[i]
+                url_header=urls[i]
+        
         #retrieve list of granules
-        url=link.replace('\$value',"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
-        print url
-        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granules.xml',url)
+        url_granule_dir=link.replace('\$value',"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
+        print url_granule_dir
+        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granule_dir.xml',url_granule_dir)
         os.system(commande_wget)
-        granule=get_granule_name('granules.xml',options.tile)
+        urls,types,names=get_elements('granule_dir.xml')
+        granule=None
+        #search the tile
+        for i in range(len(urls)):
+            if names[i].find(options.tile)>0:
+                granule=names[i]
+        if granule==None:
+            print "Tile %s is not available within product"%options.tile
+            sys.exit(-3)
         print granule
-        # download granule:
-        url="%s('%s')/\\$value"%(url,granule)
-        commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,granule+".zip",url)
+        #create tile directory
+        nom_rep_tuile=("%s/%s"%(options.write_dir,granule))
+        if not(os.path.exists(nom_rep_tuile)) :
+            os.mkdir(nom_rep_tuile)
+        # download product header file
+        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,nom_rep_tuile+'/'+xml,url_header+"/\\$value")
         os.system(commande_wget)
+   
+        # granule files
+        url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
+        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granule.xml',url_granule)
+        print commande_wget
+        os.system(commande_wget)
+        download_tree(options.write_dir+'/'+granule,"granule.xml",wg,auth)
         
     else :
         print "too many clouds to download this product" 
