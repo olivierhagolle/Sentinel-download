@@ -252,23 +252,24 @@ for prod in products:
             if names[i].find(options.tile)>0:
                 granule=names[i]
         if granule==None:
+	    print "========================================"
             print "Tile %s is not available within product"%options.tile
-            sys.exit(-3)
-        print granule
-        #create tile directory
-        nom_rep_tuile=("%s/%s"%(options.write_dir,granule))
-        if not(os.path.exists(nom_rep_tuile)) :
-            os.mkdir(nom_rep_tuile)
-        # download product header file
-        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,nom_rep_tuile+'/'+xml,url_header+"/\\$value")
-        os.system(commande_wget)
-   
-        # granule files
-        url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
-        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granule.xml',url_granule)
-        print commande_wget
-        os.system(commande_wget)
-        download_tree(options.write_dir+'/'+granule,"granule.xml",wg,auth)
+	    print "========================================"	    
+	else :
+	    #create tile directory
+	    nom_rep_tuile=("%s/%s"%(options.write_dir,granule))
+	    if not(os.path.exists(nom_rep_tuile)) :
+		os.mkdir(nom_rep_tuile)
+	    # download product header file
+	    commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,nom_rep_tuile+'/'+xml,url_header+"/\\$value")
+	    os.system(commande_wget)
+
+	    # granule files
+	    url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
+	    commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granule.xml',url_granule)
+	    print commande_wget
+	    os.system(commande_wget)
+	    download_tree(options.write_dir+'/'+granule,"granule.xml",wg,auth)
         
     else :
         print "too many clouds to download this product" 
