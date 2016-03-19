@@ -14,8 +14,8 @@ This tool was written thanks to ESA well documented scihub API : https://scihub.
 
 To use this tool, you need a scihub account obtained a long time in advance (see below). If you do not have such an account, or if you want to try a faster access, you might consider downloading the products from the [French collaborative ground segment PEPS](https://github.com/olivierhagolle/peps_download).
 
-### wget
-To use it, you need *wget* installed. I guess it goes with any linux distribution. For windows, I don't know, but maybe someone can tell.
+### wget /aria2
+To use it, you need either to have *wget* or *aria2* installed. I guess it goes with any linux distribution. For windows users, first install aria2 (https://aria2.github.io).
 If your download stops for a network issue, you can restart S2-download, as wget knows how to resume without havind to download everything again. Wget doesnot download the products already fully downloaded (unlesss you have unzipped them).
 
 ### Proxy
@@ -39,6 +39,10 @@ Here are a few examples for Sentinel-2
 - To download all products over Toulouse taken from Path 51
 
 `python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
+
+- To download all products over Toulouse taken from Path 51 with aria2 for windows
+
+`python  Sentinel_download.py --downloader="aria2" --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
 
 - To see all products over Toulouse taken from Path 51, but without downloading, thanks to -n option
 
