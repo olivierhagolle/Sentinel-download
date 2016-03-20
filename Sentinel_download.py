@@ -2,6 +2,7 @@
 # -*- coding: iso-8859-1 -*-
 
 import os,sys
+import os
 import optparse
 from xml.dom import minidom
 
@@ -34,19 +35,20 @@ def get_elements(xml_file):
     return urls,contentType,name
 
 # recursively download file tree of a Granule
-def download_tree(rep,xml_file,wg,auth):
+def download_tree(rep,xml_file,wg,auth,wg_opt,value):
     urls,types,names=get_elements(xml_file)
     for i in range(len(urls)):
         if types[i]=='Item':
             nom_rep="%s/%s"%(rep,names[i])
             if not(os.path.exists(nom_rep)):
                 os.mkdir(nom_rep)
-            commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'files.xml',urls[i]+"/Nodes")
+            commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'files.xml',urls[i]+"/Nodes")
             print commande_wget
             os.system(commande_wget)
-            download_tree(nom_rep,'files.xml',wg,auth)
-        else:                       
-            commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,rep+'/'+names[i],urls[i]+'/\\$value')
+            download_tree(nom_rep,'files.xml',wg,auth,wg_opt,value)
+        else:
+            commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,rep+'/'+names[i],urls[i]+'/'+value)
+
             os.system(commande_wget)           
 
 
@@ -71,6 +73,8 @@ if len(sys.argv) == 1:
 else:
     usage = "usage: %prog [options] "
     parser = OptionParser(usage=usage)
+    parser.add_option("--downloader", dest="downloader", action="store", type="string", \
+            help="downloader options are aria2 or wget (default is wget)",default=None)
     parser.add_option("--lat", dest="lat", action="store", type="float", \
             help="latitude in decimal degrees",default=None)
     parser.add_option("--lon", dest="lon", action="store", type="float", \
@@ -127,8 +131,8 @@ else:
         print "The tile option (-t) can only be used for Sentinel-2"
         sys.exit(-1)
         
-    parser.check_required("-a")        
-
+    parser.check_required("-a")    
+    
 #====================
 # read password file
 #====================
@@ -147,12 +151,26 @@ except :
 #==================================================
 #      prepare wget command line to search catalog
 #==================================================
-
-wg="wget --no-check-certificate"
-auth='--user="%s" --password="%s"'%(account,passwd)
-search_output="--output-document=query_results.xml"
+if os.path.exists('query_results.xml'):
+    os.remove('query_results.xml')
 
 
+
+if options.downloader=="aria2":
+    wg='aria2c --check-certificate=false'
+    auth='--http-user="%s" --http-passwd="%s"'%(account,passwd)
+    search_output=" --continue -o query_results.xml"
+    wg_opt=" -o "
+    if sys.platform.startswith('linux'):
+        value="\$value"
+    else:
+        value="$value"
+else :
+    wg="wget --no-check-certificate"
+    auth='--user="%s" --password="%s"'%(account,passwd)
+    search_output="--output-document=query_results.xml"
+    wg_opt=" --continue --output-document="
+    value="\\$value"
 
 if geom=='point':
     query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
@@ -191,12 +209,12 @@ for prod in products:
     print ident
     link=prod.getElementsByTagName("link")[0].attributes.items()[0][1] 
     #to avoid wget to remove $ special character
-    link=link.replace('$','\\$')
+    link=link.replace('$value',value)
 
 
     for node in prod.getElementsByTagName("str"):
-        (name,value)=node.attributes.items()[0]
-        if value=="filename":
+        (name,field)=node.attributes.items()[0]
+        if field=="filename":
             filename= str(node.toxml()).split('>')[1].split('<')[0]   #ugly, but minidom is not straightforward
 
     #print what has been found
@@ -208,19 +226,19 @@ for prod in products:
 
     if options.sentinel.find("S2") >=0 :
         for node in prod.getElementsByTagName("double"):
-            (name,value)=node.attributes.items()[0]
-            if value=="cloudcoverpercentage":
+            (name,field)=node.attributes.items()[0]
+            if field=="cloudcoverpercentage":
                 cloud=float((node.toxml()).split('>')[1].split('<')[0])
             print "cloud percentage = %5.2f %%"%cloud
     else:
         cloud=0
-    print "===============================================\n"
 
-  
+    print "===============================================\n"
+ 
 
     #==================================download product
     if( cloud<options.max_cloud or (options.sentinel.find("S1")>=0)) and options.tile==None:
-        commande_wget='%s %s --continue --output-document=%s/%s "%s"'%(wg,auth,options.write_dir,filename+".zip",link)
+        commande_wget='%s %s %s%s/%s "%s"'%(wg,auth,wg_opt,options.write_dir,filename+".zip",link)
         #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
         unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
         print commande_wget
@@ -230,8 +248,8 @@ for prod in products:
     # download only one tile, file by file.        
     elif options.tile!=None:
         #find URL of header file
-        url_file_dir=link.replace('\$value',"Nodes('%s')/Nodes"%(filename))
-        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'file_dir.xml',url_file_dir)
+        url_file_dir=link.replace(value,"Nodes('%s')/Nodes"%(filename))
+        commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'file_dir.xml',url_file_dir)
         os.system(commande_wget)
         urls,types,names=get_elements('file_dir.xml')
         #search for the xml file
@@ -241,9 +259,9 @@ for prod in products:
                 url_header=urls[i]
         
         #retrieve list of granules
-        url_granule_dir=link.replace('\$value',"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
+        url_granule_dir=link.replace(value,"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
         print url_granule_dir
-        commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granule_dir.xml',url_granule_dir)
+        commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule_dir.xml',url_granule_dir)
         os.system(commande_wget)
         urls,types,names=get_elements('granule_dir.xml')
         granule=None
@@ -252,24 +270,24 @@ for prod in products:
             if names[i].find(options.tile)>0:
                 granule=names[i]
         if granule==None:
-	    print "========================================"
+            print "========================================"
             print "Tile %s is not available within product"%options.tile
-	    print "========================================"	    
-	else :
-	    #create tile directory
-	    nom_rep_tuile=("%s/%s"%(options.write_dir,granule))
-	    if not(os.path.exists(nom_rep_tuile)) :
-		os.mkdir(nom_rep_tuile)
-	    # download product header file
-	    commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,nom_rep_tuile+'/'+xml,url_header+"/\\$value")
-	    os.system(commande_wget)
+            print "========================================"	    
+        else :
+            #create tile directory
+            nom_rep_tuile=("%s/%s"%(options.write_dir,granule))
+            if not(os.path.exists(nom_rep_tuile)) :
+                os.mkdir(nom_rep_tuile)
+            # download product header file
+            commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,nom_rep_tuile+'/'+xml,url_header+"/"+value)
+            os.system(commande_wget)
 
-	    # granule files
-	    url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
-	    commande_wget='%s %s --continue --output-document=%s "%s"'%(wg,auth,'granule.xml',url_granule)
-	    print commande_wget
-	    os.system(commande_wget)
-	    download_tree(options.write_dir+'/'+granule,"granule.xml",wg,auth)
+            # granule files
+            url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
+            commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule.xml',url_granule)
+            print commande_wget
+            os.system(commande_wget)
+            download_tree(options.write_dir+'/'+granule,"granule.xml",wg,auth,wg_opt,value)
         
     else :
         print "too many clouds to download this product" 
