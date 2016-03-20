@@ -1,11 +1,10 @@
 # Sentinel-download
 ### Description
-Tool to download Sentinel data from ESA (through wget). This tool can download whole products or only one tile per product, with the -t option (http://olivierhagolle.github.io/Sentinel-download).
+Tool to download Sentinel data from ESA (using the wget or aria2 downloaders). This tool can download whole products or only one tile per product, with the -t option (http://olivierhagolle.github.io/Sentinel-download). It should work both on windows and linux.
 
 The ESA Sentinel distribution website allows you to perform catalog searches through http requests. This blog post shows [a few examples](http://www.cesbio.ups-tlse.fr/multitemp/?p=6419). 
 
-This module searches the ESA apihub catalog and downloads the products which fit the criteria defined in the command line.
-You can select by :
+Sentinel-download searches the ESA apihub catalog and downloads the products which fit the criteria defined in the command line. You can select products by :
 - coordinates of a point, or of a rectangle
 - path number (sometimes, a point can be observed from several paths
 - date, of course
@@ -42,7 +41,7 @@ Here are a few examples for Sentinel-2
 
 - To download all products over Toulouse taken from Path 51 with aria2 for windows
 
-`python  Sentinel_download.py --downloader="aria2" --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
+`python  Sentinel_download.py --downloader aria2 --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
 
 - To see all products over Toulouse taken from Path 51, but without downloading, thanks to -n option
 
