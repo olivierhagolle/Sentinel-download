@@ -252,6 +252,7 @@ for prod in products:
         #find URL of header file
         url_file_dir=link.replace(value,"Nodes('%s')/Nodes"%(filename))
         commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'file_dir.xml',url_file_dir)
+	os.system(commande_wget)
         urls,types,names=get_elements('file_dir.xml')
         #search for the xml file
         for i in range(len(urls)):
