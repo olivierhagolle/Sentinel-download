@@ -49,7 +49,10 @@ def download_tree(rep,xml_file,wg,auth,wg_opt,value):
         else:
             commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,rep+'/'+names[i],urls[i]+'/'+value)
 
-            os.system(commande_wget)           
+            os.system(commande_wget)
+	    #retry download in case of a Bad Gateway error"
+	    while os.path.getsize(rep+'/'+names[i])==0 :
+		   os.system(commande_wget)
 
 
 ##########################################################################
