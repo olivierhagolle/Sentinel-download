@@ -173,7 +173,10 @@ else :
     auth='--user="%s" --password="%s"'%(account,passwd)
     search_output="--output-document=query_results.xml"
     wg_opt=" --continue --output-document="
-    value="\\$value"
+    if sys.platform.startswith('linux'):
+        value="\\$value"
+    else:
+        value="$value"
 
 if geom=='point':
     query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
