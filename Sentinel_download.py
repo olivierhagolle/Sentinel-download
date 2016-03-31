@@ -179,9 +179,16 @@ else :
         value="$value"
 
 if geom=='point':
-    query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
+    if sys.platform.startswith('linux'):
+	query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
+    else :
+	query_geom='footprint:"Intersects(%f,%f)"'%(options.lat,options.lon)
+	
 elif geom=='rectangle':
-    query_geom='footprint:\\"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))\\"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
+    if sys.platform.startswith('linux'):
+	query_geom='footprint:\\"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))\\"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
+    else :
+	query_geom='footprint:"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
     
 
 if options.orbit==None:
@@ -265,16 +272,18 @@ for prod in products:
             if names[i].find('SAFL1C')>0:
                 xml=names[i]
                 url_header=urls[i]
-        
+
+	#DataStrip dir
+	url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
+
         #retrieve list of granules
         url_granule_dir=link.replace(value,"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
-	url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
         print url_granule_dir
         commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule_dir.xml',url_granule_dir)
         os.system(commande_wget)
         urls,types,names=get_elements('granule_dir.xml')
         granule=None
-        #search the tile
+        #search for the tile
         for i in range(len(urls)):
             if names[i].find(options.tile)>0:
                 granule=names[i]
@@ -288,7 +297,12 @@ for prod in products:
 	    if not(os.path.exists(product_dir_name)) :
                 os.mkdir(product_dir_name)
             #create tile directory
-            nom_rep_tuile=("%s/%s"%(product_dir_name,granule))
+	    granule_dir_name=("%s/%s"%(product_dir_name,'GRANULE'))
+	    if not(os.path.exists(granule_dir_name)) :
+                os.mkdir(granule_dir_name)
+            #create tile directory
+	    
+            nom_rep_tuile=("%s/%s"%(granule_dir_name,granule))
             if not(os.path.exists(nom_rep_tuile)) :
                 os.mkdir(nom_rep_tuile)
             # download product header file
@@ -310,7 +324,7 @@ for prod in products:
             commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule.xml',url_granule)
             print commande_wget
             os.system(commande_wget)
-            download_tree(product_dir_name+'/'+granule,"granule.xml",wg,auth,wg_opt,value)
+            download_tree(nom_rep_tuile,"granule.xml",wg,auth,wg_opt,value)
 
         
     else :
