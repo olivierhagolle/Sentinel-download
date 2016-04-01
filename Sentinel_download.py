@@ -54,6 +54,16 @@ def download_tree(rep,xml_file,wg,auth,wg_opt,value):
 	    while os.path.getsize(rep+'/'+names[i])==0 :
 		   os.system(commande_wget)
 
+def get_dir(dir_name,dir_url,product_dir_name,wg,auth,wg_opt,value):
+    dir=("%s/%s"%(product_dir_name,dir_name))
+    if not(os.path.exists(dir)) :
+	os.mkdir(dir)
+    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'temp.xml',dir_url)
+    print commande_wget
+    os.system(commande_wget)
+    download_tree(product_dir_name+'/'+dir_name,"temp.xml",wg,auth,wg_opt,value)
+   
+    
 
 ##########################################################################
 
@@ -249,7 +259,7 @@ for prod in products:
     print "===============================================\n"
  
 
-    #==================================download product
+    #==================================download  whole product
     if( cloud<options.max_cloud or (options.sentinel.find("S1")>=0)) and options.tile==None:
         commande_wget='%s %s %s%s/%s "%s"'%(wg,auth,wg_opt,options.write_dir,filename+".zip",link)
         #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
@@ -272,10 +282,8 @@ for prod in products:
             if names[i].find('SAFL1C')>0:
                 xml=names[i]
                 url_header=urls[i]
-
-	#DataStrip dir
-	url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
-
+	
+	
         #retrieve list of granules
         url_granule_dir=link.replace(value,"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
         print url_granule_dir
@@ -307,17 +315,36 @@ for prod in products:
                 os.mkdir(nom_rep_tuile)
             # download product header file
             commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+xml,url_header+"/"+value)
+	    print commande_wget
             os.system(commande_wget)
 
-	    # data_strip
-	    data_strip_dir=("%s/%s"%(product_dir_name,'DATASTRIP'))
-	    if not(os.path.exists(data_strip_dir)) :
-                os.mkdir(data_strip_dir)
-	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'datastrip.xml',url_datastrip_dir)
-            print commande_wget
-	    os.system(commande_wget)
-	    download_tree(product_dir_name+'/DATASTRIP',"datastrip.xml",wg,auth,wg_opt,value)
+	    #download INSPIRE.xml
+	    url_inspire=link.replace(value,"Nodes('%s')/Nodes('INSPIRE.xml')/"%(filename))
+	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"INSPIRE.xml",url_inspire+"/"+value)
+	    print commande_wget
+            os.system(commande_wget)
+	    
+	    url_manifest=link.replace(value,"Nodes('%s')/Nodes('manifest.safe')/"%(filename))
+	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"manifest.safe",url_manifest+"/"+value)
+	    print commande_wget
+            os.system(commande_wget)
+	    
+	    # rep_info
+	    url_rep_info_dir=link.replace(value,"Nodes('%s')/Nodes('rep_info')/Nodes"%(filename))
+	    get_dir('rep_info',url_rep_info_dir,product_dir_name,wg,auth,wg_opt,value)
 
+	    # HTML
+	    url_html_dir=link.replace(value,"Nodes('%s')/Nodes('HTML')/Nodes"%(filename))
+	    get_dir('HTML',url_html_dir,product_dir_name,wg,auth,wg_opt,value)
+
+	    # AUX_DATA
+	    url_auxdata_dir=link.replace(value,"Nodes('%s')/Nodes('AUX_DATA')/Nodes"%(filename))
+	    get_dir('AUX_DATA',url_auxdata_dir,product_dir_name,wg,auth,wg_opt,value)
+
+	    # DATASTRIP
+	    url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
+	    get_dir('DATASTRIP',url_datastrip_dir,product_dir_name,wg,auth,wg_opt,value)
+	    
 
             # granule files
             url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
