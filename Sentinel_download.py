@@ -174,7 +174,7 @@ if options.downloader=="aria2":
     auth='--http-user="%s" --http-passwd="%s"'%(account,passwd)
     search_output=" --continue -o query_results.xml"
     wg_opt=" -o "
-    if sys.platform.startswith('linux'):
+    if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         value="\$value"
     else:
         value="$value"
@@ -183,22 +183,22 @@ else :
     auth='--user="%s" --password="%s"'%(account,passwd)
     search_output="--output-document=query_results.xml"
     wg_opt=" --continue --output-document="
-    if sys.platform.startswith('linux'):
+    if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         value="\\$value"
     else:
         value="$value"
 
 if geom=='point':
-    if sys.platform.startswith('linux'):
-	query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
+    if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+        query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
     else :
-	query_geom='footprint:"Intersects(%f,%f)"'%(options.lat,options.lon)
+        query_geom='footprint:"Intersects(%f,%f)"'%(options.lat,options.lon)
 	
 elif geom=='rectangle':
-    if sys.platform.startswith('linux'):
-	query_geom='footprint:\\"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))\\"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
+    if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+        query_geom='footprint:\\"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))\\"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
     else :
-	query_geom='footprint:"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
+        query_geom='footprint:"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))"'.format(latmin=options.latmin,latmax=options.latmax,lonmin=options.lonmin,lonmax=options.lonmax)
     
 
 if options.orbit==None:
