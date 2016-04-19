@@ -38,7 +38,7 @@ def get_elements(xml_file):
 def download_tree(rep,xml_file,wg,auth,wg_opt,value):
     urls,types,names=get_elements(xml_file)
     for i in range(len(urls)):
-        if types[i]=='Item':
+        if types[i]=='Item' and not 'ECMWFT' in names[i]:
             nom_rep="%s/%s"%(rep,names[i])
             if not(os.path.exists(nom_rep)):
                 os.mkdir(nom_rep)
