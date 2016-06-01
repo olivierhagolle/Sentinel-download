@@ -51,7 +51,7 @@ Here are a few examples for Sentinel-2
 
 `python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt -o 94 -m 23 -d 2015-12-06 -n -s S2`
 
-- to download all products above Toulouse downloaded after 2015-12-26 (December 26th)
+- to download all products above Toulouse acquired after 2015-12-26 (December 26th)
 
 `python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 -d 20151226 -s S2`
 
