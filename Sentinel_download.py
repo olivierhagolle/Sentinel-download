@@ -5,6 +5,7 @@ import os,sys
 import os
 import optparse
 from xml.dom import minidom
+from datetime import date
 
 ###########################################################################
 class OptionParser (optparse.OptionParser):
@@ -102,9 +103,9 @@ else:
             help="max longitude in decimal degrees",default=None)
 
     parser.add_option("-d", "--start_date", dest="start_date", action="store", type="string", \
-            help="start date, fmt('2015-12-22')",default=None)
+            help="start date, fmt('20151222')",default=None)
     parser.add_option("-f","--end_date", dest="end_date", action="store", type="string", \
-            help="end date, fmt('2015-12-23')",default=None)
+            help="end date, fmt('20151223')",default=None)
     parser.add_option("-o","--orbit", dest="orbit", action="store", type="int", \
             help="Orbit Number", default=None)			
     parser.add_option("-a","--apihub_passwd", dest="apihub", action="store", type="string", \
@@ -206,16 +207,15 @@ if options.orbit==None:
 else :
     query='%s filename:%s*R%03d*'%(query_geom,options.sentinel,options.orbit)
 
-
 if options.start_date!=None:    
-    start_date=options.start_date+"T00:00:00.000Z"
-    if options.end_date!=None:
-        end_date=options.end_date+"T23:59:50.000Z"
-    else:
-        end_date="NOW"
-
-    query_date=" ingestiondate:[%s TO %s]"%(start_date,end_date)
-    query=query+query_date
+    start_date=options.start_date
+else :
+    start_date="20150613" #Sentinel-2 launch date
+    
+if options.end_date!=None:
+    end_date=options.end_date
+else:
+    end_date=date.today().strftime(format='%Y%m%d') 
 
 commande_wget='%s %s %s "%s%s&rows=%d"'%(wg,auth,search_output,url_search,query,options.MaxRecords)
 print commande_wget
@@ -240,119 +240,123 @@ for prod in products:
         if field=="filename":
             filename= str(node.toxml()).split('>')[1].split('<')[0]   #ugly, but minidom is not straightforward
 
-    #print what has been found
-    print "\n==============================================="
-    print filename        
-    print link
-    if options.dhus==True:
-        link=link.replace("apihub","dhus")
+    #test if product is within the requested time period
+    date_prod=filename.split('_')[7][1:9]
+    if date_prod>=start_date and date_prod<=end_date:
+    
+	#print what has been found
+	print "\n==============================================="
+	print filename        
+	print link
+	if options.dhus==True:
+	    link=link.replace("apihub","dhus")
 
-    if options.sentinel.find("S2") >=0 :
-        for node in prod.getElementsByTagName("double"):
-            (name,field)=node.attributes.items()[0]
-            if field=="cloudcoverpercentage":
-                cloud=float((node.toxml()).split('>')[1].split('<')[0])
-            print "cloud percentage = %5.2f %%"%cloud
-    else:
-        cloud=0
+	if options.sentinel.find("S2") >=0 :
+	    for node in prod.getElementsByTagName("double"):
+		(name,field)=node.attributes.items()[0]
+		if field=="cloudcoverpercentage":
+		    cloud=float((node.toxml()).split('>')[1].split('<')[0])
+		print "cloud percentage = %5.2f %%"%cloud
+	else:
+	    cloud=0
 
-    print "===============================================\n"
- 
+	print "===============================================\n"
 
-    #==================================download  whole product
-    if( cloud<options.max_cloud or (options.sentinel.find("S1")>=0)) and options.tile==None:
-        commande_wget='%s %s %s%s/%s "%s"'%(wg,auth,wg_opt,options.write_dir,filename+".zip",link)
-        #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
-        unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
-        print commande_wget
-        if unzipped_file_exists==False and options.no_download==False:
-            os.system(commande_wget)
+
+	#==================================download  whole product
+	if( cloud<options.max_cloud or (options.sentinel.find("S1")>=0)) and options.tile==None:
+	    commande_wget='%s %s %s%s/%s "%s"'%(wg,auth,wg_opt,options.write_dir,filename+".zip",link)
+	    #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
+	    unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
+	    print commande_wget
+	    if unzipped_file_exists==False and options.no_download==False:
+		os.system(commande_wget)
+	    else :
+		print unzipped_file_exists, options.no_download
+
+	# download only one tile, file by file.        
+	elif options.tile!=None:
+	    #find URL of header file
+	    url_file_dir=link.replace(value,"Nodes('%s')/Nodes"%(filename))
+	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'file_dir.xml',url_file_dir)
+	    os.system(commande_wget)
+	    urls,types,names=get_elements('file_dir.xml')
+	    #search for the xml file
+	    for i in range(len(urls)):
+		if names[i].find('SAFL1C')>0:
+		    xml=names[i]
+		    url_header=urls[i]
+
+
+	    #retrieve list of granules
+	    url_granule_dir=link.replace(value,"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
+	    print url_granule_dir
+	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule_dir.xml',url_granule_dir)
+	    os.system(commande_wget)
+	    urls,types,names=get_elements('granule_dir.xml')
+	    granule=None
+	    #search for the tile
+	    for i in range(len(urls)):
+		if names[i].find(options.tile)>0:
+		    granule=names[i]
+	    if granule==None:
+		print "========================================================================"
+		print "Tile %s is not available within product (check coordinates or tile name)"%options.tile
+		print "========================================================================"	    
+	    else :
+		#create product directory
+		product_dir_name=("%s/%s"%(options.write_dir,filename))
+		if not(os.path.exists(product_dir_name)) :
+		    os.mkdir(product_dir_name)
+		#create tile directory
+		granule_dir_name=("%s/%s"%(product_dir_name,'GRANULE'))
+		if not(os.path.exists(granule_dir_name)) :
+		    os.mkdir(granule_dir_name)
+		#create tile directory
+
+		nom_rep_tuile=("%s/%s"%(granule_dir_name,granule))
+		if not(os.path.exists(nom_rep_tuile)) :
+		    os.mkdir(nom_rep_tuile)
+		# download product header file
+		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+xml,url_header+"/"+value)
+		print commande_wget
+		os.system(commande_wget)
+
+		#download INSPIRE.xml
+		url_inspire=link.replace(value,"Nodes('%s')/Nodes('INSPIRE.xml')/"%(filename))
+		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"INSPIRE.xml",url_inspire+"/"+value)
+		print commande_wget
+		os.system(commande_wget)
+
+		url_manifest=link.replace(value,"Nodes('%s')/Nodes('manifest.safe')/"%(filename))
+		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"manifest.safe",url_manifest+"/"+value)
+		print commande_wget
+		os.system(commande_wget)
+
+		# rep_info
+		url_rep_info_dir=link.replace(value,"Nodes('%s')/Nodes('rep_info')/Nodes"%(filename))
+		get_dir('rep_info',url_rep_info_dir,product_dir_name,wg,auth,wg_opt,value)
+
+		# HTML
+		url_html_dir=link.replace(value,"Nodes('%s')/Nodes('HTML')/Nodes"%(filename))
+		get_dir('HTML',url_html_dir,product_dir_name,wg,auth,wg_opt,value)
+
+		# AUX_DATA
+		url_auxdata_dir=link.replace(value,"Nodes('%s')/Nodes('AUX_DATA')/Nodes"%(filename))
+		get_dir('AUX_DATA',url_auxdata_dir,product_dir_name,wg,auth,wg_opt,value)
+
+		# DATASTRIP
+		url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
+		get_dir('DATASTRIP',url_datastrip_dir,product_dir_name,wg,auth,wg_opt,value)
+
+
+		# granule files
+		url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
+		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule.xml',url_granule)
+		print commande_wget
+		os.system(commande_wget)
+		download_tree(nom_rep_tuile,"granule.xml",wg,auth,wg_opt,value)
+
+
 	else :
-	    print unzipped_file_exists, options.no_download
-
-    # download only one tile, file by file.        
-    elif options.tile!=None:
-        #find URL of header file
-        url_file_dir=link.replace(value,"Nodes('%s')/Nodes"%(filename))
-        commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'file_dir.xml',url_file_dir)
-	os.system(commande_wget)
-        urls,types,names=get_elements('file_dir.xml')
-        #search for the xml file
-        for i in range(len(urls)):
-            if names[i].find('SAFL1C')>0:
-                xml=names[i]
-                url_header=urls[i]
-	
-	
-        #retrieve list of granules
-        url_granule_dir=link.replace(value,"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
-        print url_granule_dir
-        commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule_dir.xml',url_granule_dir)
-        os.system(commande_wget)
-        urls,types,names=get_elements('granule_dir.xml')
-        granule=None
-        #search for the tile
-        for i in range(len(urls)):
-            if names[i].find(options.tile)>0:
-                granule=names[i]
-        if granule==None:
-            print "========================================================================"
-            print "Tile %s is not available within product (check coordinates or tile name)"%options.tile
-            print "========================================================================"	    
-        else :
-	    #create product directory
-	    product_dir_name=("%s/%s"%(options.write_dir,filename))
-	    if not(os.path.exists(product_dir_name)) :
-                os.mkdir(product_dir_name)
-            #create tile directory
-	    granule_dir_name=("%s/%s"%(product_dir_name,'GRANULE'))
-	    if not(os.path.exists(granule_dir_name)) :
-                os.mkdir(granule_dir_name)
-            #create tile directory
-	    
-            nom_rep_tuile=("%s/%s"%(granule_dir_name,granule))
-            if not(os.path.exists(nom_rep_tuile)) :
-                os.mkdir(nom_rep_tuile)
-            # download product header file
-            commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+xml,url_header+"/"+value)
-	    print commande_wget
-            os.system(commande_wget)
-
-	    #download INSPIRE.xml
-	    url_inspire=link.replace(value,"Nodes('%s')/Nodes('INSPIRE.xml')/"%(filename))
-	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"INSPIRE.xml",url_inspire+"/"+value)
-	    print commande_wget
-            os.system(commande_wget)
-	    
-	    url_manifest=link.replace(value,"Nodes('%s')/Nodes('manifest.safe')/"%(filename))
-	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"manifest.safe",url_manifest+"/"+value)
-	    print commande_wget
-            os.system(commande_wget)
-	    
-	    # rep_info
-	    url_rep_info_dir=link.replace(value,"Nodes('%s')/Nodes('rep_info')/Nodes"%(filename))
-	    get_dir('rep_info',url_rep_info_dir,product_dir_name,wg,auth,wg_opt,value)
-
-	    # HTML
-	    url_html_dir=link.replace(value,"Nodes('%s')/Nodes('HTML')/Nodes"%(filename))
-	    get_dir('HTML',url_html_dir,product_dir_name,wg,auth,wg_opt,value)
-
-	    # AUX_DATA
-	    url_auxdata_dir=link.replace(value,"Nodes('%s')/Nodes('AUX_DATA')/Nodes"%(filename))
-	    get_dir('AUX_DATA',url_auxdata_dir,product_dir_name,wg,auth,wg_opt,value)
-
-	    # DATASTRIP
-	    url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
-	    get_dir('DATASTRIP',url_datastrip_dir,product_dir_name,wg,auth,wg_opt,value)
-	    
-
-            # granule files
-            url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
-            commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule.xml',url_granule)
-            print commande_wget
-            os.system(commande_wget)
-            download_tree(nom_rep_tuile,"granule.xml",wg,auth,wg_opt,value)
-
-        
-    else :
-        print "too many clouds to download this product" 
+	    print "too many clouds to download this product" 
