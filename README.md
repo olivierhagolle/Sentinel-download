@@ -51,13 +51,13 @@ Here are a few examples for Sentinel-2
 
 `python  Sentinel_download.py --latmin 43 --latmax 46 --lonmin -1 --lonmax 2 -a apihub.txt -o 94 -m 23 -d 2015-12-06 -n -s S2`
 
-- to download all products above Toulouse downloaded after 2015-12-06
+- to download all products above Toulouse acquired after 2015-12-26 (December 26th)
 
-`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -s S2`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 -d 20151226 -s S2`
 
 - you may also change the output directory with the -w option
 
-`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 -d 2015-12-06 -w /mnt/data/Sentinel-2/ -s S2`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 -d 20151226 -w /mnt/data/Sentinel-2/ -s S2`
 
 - and finally, you may download only one tile from the product (the one which contains Toulouse for instance)
 `python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -t 31TCJ`
