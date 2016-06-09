@@ -241,7 +241,14 @@ for prod in products:
             filename= str(node.toxml()).split('>')[1].split('<')[0]   #ugly, but minidom is not straightforward
 
     #test if product is within the requested time period
-    date_prod=filename.split('_')[7][1:9]
+    if options.sentinel.startswith("S2"):
+        date_prod=filename.split('_')[7][1:9]
+    elif  options.sentinel.startswith("S1"):
+        date_prod=filename.split('_')[5][0:8]
+    else :
+        print "Please choose either S1 or S2"
+        sys.exit(-1)
+        
     if date_prod>=start_date and date_prod<=end_date:
     
 	#print what has been found
