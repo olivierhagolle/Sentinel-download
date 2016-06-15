@@ -16,8 +16,8 @@ To use this tool, you need a scihub account obtained a long time in advance (see
 ### wget /aria2
 To use it, you need either to have *wget* or *aria2* installed. I guess it goes with any linux distribution. For windows users, first install aria2 (https://aria2.github.io).
 If your download stops for a network issue, you can restart S2-download, as wget knows how to resume without havind to download everything again. Wget doesnot download the products already fully downloaded (unlesss you have unzipped them).
-wget is the downloader by default, If you want to use aria2
-add `--downloader aria2` in your command line
+
+wget is the downloader by default, If you want to use aria2, add `--downloader aria2` in your command line
 
 ### Proxy
 In case your download must be done through a proxy, you have to setup the https_proxy variable in your.bashrc file or in your .profile.
