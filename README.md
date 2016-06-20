@@ -9,7 +9,7 @@ Sentinel-download searches the ESA apihub catalog and downloads the products whi
 - path number (sometimes, a point can be observed from several paths
 - date, of course
 
-This tool was written thanks to ESA well documented scihub API : https://scihub.esa.int/userguide/5APIsAndBatchScripting.
+This tool was written thanks to ESA well documented scihub API : https://scihub.copernicus.eu/userguide/5APIsAndBatchScripting.
 
 To use this tool, you need a scihub account obtained a long time in advance (see below). If you do not have such an account, or if you want to try a faster access, you might consider downloading the products from the [French collaborative ground segment PEPS](https://github.com/olivierhagolle/peps_download).
 
