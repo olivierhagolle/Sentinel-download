@@ -39,6 +39,7 @@ def get_elements(xml_file):
 def download_tree(rep,xml_file,wg,auth,wg_opt,value):
     urls,types,names=get_elements(xml_file)
     for i in range(len(urls)):
+        urls[i]=urls[i].replace("eu/odata","eu/apihub/odata") #patch the url
         if types[i]=='Item' and not 'ECMWFT' in names[i]:
             nom_rep="%s/%s"%(rep,names[i])
             if not(os.path.exists(nom_rep)):
@@ -57,8 +58,9 @@ def download_tree(rep,xml_file,wg,auth,wg_opt,value):
 
 def get_dir(dir_name,dir_url,product_dir_name,wg,auth,wg_opt,value):
     dir=("%s/%s"%(product_dir_name,dir_name))
+    dir_url=dir_url.replace("eu/odata","eu/apihub/odata")  #patch the url
     if not(os.path.exists(dir)) :
-	os.mkdir(dir)
+        os.mkdir(dir)
     commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'temp.xml',dir_url)
     print commande_wget
     os.system(commande_wget)
