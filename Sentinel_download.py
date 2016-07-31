@@ -327,6 +327,8 @@ for prod in products:
 		if not(os.path.exists(nom_rep_tuile)) :
 		    os.mkdir(nom_rep_tuile)
 		# download product header file
+		print "############################################### header"
+		url_header=url_header.replace("eu/odata","eu/apihub/odata")
 		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+xml,url_header+"/"+value)
 		print commande_wget
 		os.system(commande_wget)
