@@ -285,88 +285,104 @@ for prod in products:
 
 	# download only one tile, file by file.        
 	elif options.tile!=None:
-	    #find URL of header file
-	    url_file_dir=link.replace(value,"Nodes('%s')/Nodes"%(filename))
-	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'file_dir.xml',url_file_dir)
-	    os.system(commande_wget)
-	    urls,types,names=get_elements('file_dir.xml')
-	    #search for the xml file
-	    for i in range(len(urls)):
-		if names[i].find('SAFL1C')>0:
-		    xml=names[i]
-		    url_header=urls[i]
+            #do not download the product if the tile is already downloaded.
+            unzipped_tile_exists = False
+            if os.path.exists(("%s/%s")%(options.write_dir,filename)):
+                if os.path.exists(("%s/%s/%s")%(options.write_dir,filename,"GRANULE")):
+                    entries = os.listdir(("%s/%s/%s")%(options.write_dir,filename,"GRANULE"))
+                    for entry in entries:
+                        entry_split = entry.split("_")
+                        if len(entry_split) == 11:
+                            tile_identifier = "T"+options.tile
+                            if tile_identifier in entry_split:
+                                unzipped_tile_exists= True
+
+            if unzipped_tile_exists or options.no_download:
+                print unzipped_tile_exists, options.no_download
+                print "tile already exists or option -n is set, skipping this download"
+            else:                
+                #find URL of header file
+                url_file_dir=link.replace(value,"Nodes('%s')/Nodes"%(filename))
+                commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'file_dir.xml',url_file_dir)
+                os.system(commande_wget)
+                urls,types,names=get_elements('file_dir.xml')
+                #search for the xml file
+                for i in range(len(urls)):
+                    if names[i].find('SAFL1C')>0:
+                        xml=names[i]
+                        url_header=urls[i]
 
 
-	    #retrieve list of granules
-	    url_granule_dir=link.replace(value,"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
-	    print url_granule_dir
-	    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule_dir.xml',url_granule_dir)
-	    os.system(commande_wget)
-	    urls,types,names=get_elements('granule_dir.xml')
-	    granule=None
-	    #search for the tile
-	    for i in range(len(urls)):
-		if names[i].find(options.tile)>0:
-		    granule=names[i]
-	    if granule==None:
-		print "========================================================================"
-		print "Tile %s is not available within product (check coordinates or tile name)"%options.tile
-		print "========================================================================"	    
-	    else :
-		#create product directory
-		product_dir_name=("%s/%s"%(options.write_dir,filename))
-		if not(os.path.exists(product_dir_name)) :
-		    os.mkdir(product_dir_name)
-		#create tile directory
-		granule_dir_name=("%s/%s"%(product_dir_name,'GRANULE'))
-		if not(os.path.exists(granule_dir_name)) :
-		    os.mkdir(granule_dir_name)
-		#create tile directory
+                #retrieve list of granules
+                url_granule_dir=link.replace(value,"Nodes('%s')/Nodes('GRANULE')/Nodes"%(filename))
+                print url_granule_dir
+                commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule_dir.xml',url_granule_dir)
+                os.system(commande_wget)
+                urls,types,names=get_elements('granule_dir.xml')
+                granule=None
+                #search for the tile
+                for i in range(len(urls)):
+                    if names[i].find(options.tile)>0:
+                        granule=names[i]
+                if granule==None:
+                    print "========================================================================"
+                    print "Tile %s is not available within product (check coordinates or tile name)"%options.tile
+                    print "========================================================================"	    
+                else :
+                    #create product directory
+                    product_dir_name=("%s/%s"%(options.write_dir,filename))
+                    if not(os.path.exists(product_dir_name)) :
+                        os.mkdir(product_dir_name)
+                    #create tile directory
+                    granule_dir_name=("%s/%s"%(product_dir_name,'GRANULE'))
+                    if not(os.path.exists(granule_dir_name)) :
+                        os.mkdir(granule_dir_name)
+                    #create tile directory
 
-		nom_rep_tuile=("%s/%s"%(granule_dir_name,granule))
-		if not(os.path.exists(nom_rep_tuile)) :
-		    os.mkdir(nom_rep_tuile)
-		# download product header file
-		print "############################################### header"
-		url_header=url_header.replace("eu/odata","eu/apihub/odata")
-		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+xml,url_header+"/"+value)
-		print commande_wget
-		os.system(commande_wget)
+                    nom_rep_tuile=("%s/%s"%(granule_dir_name,granule))
+                    if not(os.path.exists(nom_rep_tuile)) :
+                        os.mkdir(nom_rep_tuile)
+                    # download product header file
+                    print "############################################### header"
+                    url_header=url_header.replace("eu/odata","eu/apihub/odata")
+                    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+xml,url_header+"/"+value)
+                    print commande_wget
+                    os.system(commande_wget)
 
-		#download INSPIRE.xml
-		url_inspire=link.replace(value,"Nodes('%s')/Nodes('INSPIRE.xml')/"%(filename))
-		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"INSPIRE.xml",url_inspire+"/"+value)
-		print commande_wget
-		os.system(commande_wget)
+                    #download INSPIRE.xml
+                    url_inspire=link.replace(value,"Nodes('%s')/Nodes('INSPIRE.xml')/"%(filename))
+                    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"INSPIRE.xml",url_inspire+"/"+value)
+                    print commande_wget
+                    os.system(commande_wget)
 
-		url_manifest=link.replace(value,"Nodes('%s')/Nodes('manifest.safe')/"%(filename))
-		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"manifest.safe",url_manifest+"/"+value)
-		print commande_wget
-		os.system(commande_wget)
+                    url_manifest=link.replace(value,"Nodes('%s')/Nodes('manifest.safe')/"%(filename))
+                    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"manifest.safe",url_manifest+"/"+value)
+                    print commande_wget
+                    os.system(commande_wget)
 
-		# rep_info
-		url_rep_info_dir=link.replace(value,"Nodes('%s')/Nodes('rep_info')/Nodes"%(filename))
-		get_dir('rep_info',url_rep_info_dir,product_dir_name,wg,auth,wg_opt,value)
+                    # rep_info
+                    url_rep_info_dir=link.replace(value,"Nodes('%s')/Nodes('rep_info')/Nodes"%(filename))
+                    get_dir('rep_info',url_rep_info_dir,product_dir_name,wg,auth,wg_opt,value)
 
-		# HTML
-		url_html_dir=link.replace(value,"Nodes('%s')/Nodes('HTML')/Nodes"%(filename))
-		get_dir('HTML',url_html_dir,product_dir_name,wg,auth,wg_opt,value)
+                    # HTML
+                    url_html_dir=link.replace(value,"Nodes('%s')/Nodes('HTML')/Nodes"%(filename))
+                    get_dir('HTML',url_html_dir,product_dir_name,wg,auth,wg_opt,value)
 
-		# AUX_DATA
-		url_auxdata_dir=link.replace(value,"Nodes('%s')/Nodes('AUX_DATA')/Nodes"%(filename))
-		get_dir('AUX_DATA',url_auxdata_dir,product_dir_name,wg,auth,wg_opt,value)
+                    # AUX_DATA
+                    url_auxdata_dir=link.replace(value,"Nodes('%s')/Nodes('AUX_DATA')/Nodes"%(filename))
+                    get_dir('AUX_DATA',url_auxdata_dir,product_dir_name,wg,auth,wg_opt,value)
 
-		# DATASTRIP
-		url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
-		get_dir('DATASTRIP',url_datastrip_dir,product_dir_name,wg,auth,wg_opt,value)
+                    # DATASTRIP
+                    url_datastrip_dir=link.replace(value,"Nodes('%s')/Nodes('DATASTRIP')/Nodes"%(filename))
+                    get_dir('DATASTRIP',url_datastrip_dir,product_dir_name,wg,auth,wg_opt,value)
 
 
-		# granule files
-		url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
-		commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule.xml',url_granule)
-		print commande_wget
-		os.system(commande_wget)
-		download_tree(nom_rep_tuile,"granule.xml",wg,auth,wg_opt,value)
+                    # granule files
+                    url_granule="%s('%s')/Nodes"%(url_granule_dir,granule)
+                    commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule.xml',url_granule)
+                    print commande_wget
+                    os.system(commande_wget)
+                    download_tree(nom_rep_tuile,"granule.xml",wg,auth,wg_opt,value)
 
 
 	else :
