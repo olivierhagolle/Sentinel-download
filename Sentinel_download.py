@@ -47,14 +47,14 @@ def download_tree(rep,xml_file,wg,auth,wg_opt,value):
             commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'files.xml',urls[i]+"/Nodes")
             print commande_wget
             os.system(commande_wget)
+            while os.path.getsize("files.xml")==0 : #in case of "bad gateway error"
+                os.system(commande_wget)
             download_tree(nom_rep,'files.xml',wg,auth,wg_opt,value)
         else:
             commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,rep+'/'+names[i],urls[i]+'/'+value)
-
             os.system(commande_wget)
-	    #retry download in case of a Bad Gateway error"
-	    while os.path.getsize(rep+'/'+names[i])==0 :
-		   os.system(commande_wget)
+            while os.path.getsize(rep+'/'+names[i])==0 : #retry download in case of a Bad Gateway error"
+                os.system(commande_wget)
 
 def get_dir(dir_name,dir_url,product_dir_name,wg,auth,wg_opt,value):
     dir=("%s/%s"%(product_dir_name,dir_name))
@@ -64,6 +64,8 @@ def get_dir(dir_name,dir_url,product_dir_name,wg,auth,wg_opt,value):
     commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'temp.xml',dir_url)
     print commande_wget
     os.system(commande_wget)
+    while os.path.getsize("temp.xml")==0 : #in case of "bad gateway error"
+        os.system(commande_wget)
     download_tree(product_dir_name+'/'+dir_name,"temp.xml",wg,auth,wg_opt,value)
    
     
@@ -305,6 +307,8 @@ for prod in products:
                 url_file_dir=link.replace(value,"Nodes('%s')/Nodes"%(filename))
                 commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'file_dir.xml',url_file_dir)
                 os.system(commande_wget)
+                while os.path.getsize('file_dir.xml')==0 : #in case of "bad gateway error"
+                    os.system(commande_wget)
                 urls,types,names=get_elements('file_dir.xml')
                 #search for the xml file
                 for i in range(len(urls)):
@@ -318,6 +322,8 @@ for prod in products:
                 print url_granule_dir
                 commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule_dir.xml',url_granule_dir)
                 os.system(commande_wget)
+                while os.path.getsize('granule_dir.xml')==0 : #in case of "bad gateway error"
+                    os.system(commande_wget)
                 urls,types,names=get_elements('granule_dir.xml')
                 granule=None
                 #search for the tile
@@ -348,17 +354,24 @@ for prod in products:
                     commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+xml,url_header+"/"+value)
                     print commande_wget
                     os.system(commande_wget)
-
+                    while os.path.getsize(product_dir_name+'/'+xml)==0 : #in case of "bad gateway error"
+                        os.system(commande_wget)
                     #download INSPIRE.xml
                     url_inspire=link.replace(value,"Nodes('%s')/Nodes('INSPIRE.xml')/"%(filename))
                     commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"INSPIRE.xml",url_inspire+"/"+value)
+
                     print commande_wget
                     os.system(commande_wget)
+                    while os.path.getsize(product_dir_name+'/'+"INSPIRE.xml")==0 : #in case of "bad gateway error"
+                        os.system(commande_wget)
 
+                    #download manifest.safe
                     url_manifest=link.replace(value,"Nodes('%s')/Nodes('manifest.safe')/"%(filename))
                     commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,product_dir_name+'/'+"manifest.safe",url_manifest+"/"+value)
                     print commande_wget
                     os.system(commande_wget)
+                    while os.path.getsize(product_dir_name+'/'+"manifest.safe")==0 : #in case of "bad gateway error"
+                        os.system(commande_wget)
 
                     # rep_info
                     url_rep_info_dir=link.replace(value,"Nodes('%s')/Nodes('rep_info')/Nodes"%(filename))
@@ -382,6 +395,8 @@ for prod in products:
                     commande_wget='%s %s %s%s "%s"'%(wg,auth,wg_opt,'granule.xml',url_granule)
                     print commande_wget
                     os.system(commande_wget)
+                    while os.path.getsize("granule.xml")==0 : #in case of "bad gateway error"
+                        os.system(commande_wget)
                     download_tree(nom_rep_tuile,"granule.xml",wg,auth,wg_opt,value)
 
 
