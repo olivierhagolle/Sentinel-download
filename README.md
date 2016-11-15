@@ -59,7 +59,7 @@ Here are a few examples for Sentinel-2
 
 - to download all products above Toulouse ingested in November 2016
 
-`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 --id 2016-11-01 -f 2016-12-01 -s S2`
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 94 --id 2016-11-01 -if 2016-12-01 -s S2`
 
 - to download all products above Toulouse acquired after 2015-12-26 (December 26th)
 
