@@ -105,7 +105,10 @@ else:
             help="min longitude in decimal degrees",default=None)
     parser.add_option("--lonmax", dest="lonmax", action="store", type="float", \
             help="max longitude in decimal degrees",default=None)
-
+    parser.add_option("--id", "--start_ingest_date", dest="start_ingest_date", action="store", type="string", \
+            help="start ingestion date, fmt('2015-12-22')",default=None)
+    parser.add_option("--if","--end_ingest_date", dest="end_ingest_date", action="store", type="string", \
+            help="end ingestion date, fmt('2015-12-23')",default=None)     
     parser.add_option("-d", "--start_date", dest="start_date", action="store", type="string", \
             help="start date, fmt('20151222')",default=None)
     parser.add_option("-f","--end_date", dest="end_date", action="store", type="string", \
@@ -211,6 +214,25 @@ if options.orbit==None:
 else :
     query='%s filename:%s*R%03d*'%(query_geom,options.sentinel,options.orbit)
 
+
+# ingestion date
+if options.start_ingest_date!=None:    
+    start_ingest_date=options.start_ingest_date+"T00:00:00.000Z"
+else :
+    start_ingest_date="2015-06-23T00:00:00.000Z"
+
+if options.end_ingest_date!=None:
+    end_ingest_date=options.end_ingest_date+"T23:59:50.000Z"
+else:
+    end_ingest_date="NOW"
+
+if options.start_ingest_date!=None or options.end_ingest_date!=None:
+    query_date=" ingestiondate:[%s TO %s]"%(start_ingest_date,end_ingest_date)
+    query=query+query_date
+
+    
+# acquisition date    
+
 if options.start_date!=None:    
     start_date=options.start_date
 else :
@@ -233,7 +255,6 @@ xml=minidom.parse("query_results.xml")
 products=xml.getElementsByTagName("entry")
 for prod in products:
     ident=prod.getElementsByTagName("id")[0].firstChild.data
-    print ident
     link=prod.getElementsByTagName("link")[0].attributes.items()[0][1] 
     #to avoid wget to remove $ special character
     link=link.replace('$value',value)
