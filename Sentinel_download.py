@@ -278,7 +278,10 @@ for i in range(len(request_list)):
 
         #test if product is within the requested time period
         if options.sentinel.startswith("S2"):
-            date_prod=filename.split('_')[7][1:9]
+            if len(filename.split("_")) == 7:
+                date_prod=filename.split('_')[-1][:8]
+            else:
+                date_prod = filename.split('_')[7][1:9]
         elif  options.sentinel.startswith("S1"):
             date_prod=filename.split('_')[5][0:8]
         else :
