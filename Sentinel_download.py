@@ -292,6 +292,7 @@ for i in range(len(request_list)):
 
             # print what has been found
             print "\n==============================================="
+            print date_prod,start_date,end_date
             print filename
             print link
             if options.dhus==True:
@@ -309,16 +310,16 @@ for i in range(len(request_list)):
             print "===============================================\n"
 
 
-        #==================================download  whole product
-        if( cloud<options.max_cloud or (options.sentinel.find("S1")>=0)) and options.tile==None:
-            commande_wget='%s %s %s%s/%s "%s"'%(wg,auth,wg_opt,options.write_dir,filename+".zip",link)
-            #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
-            unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
-            print commande_wget
-            if unzipped_file_exists==False and options.no_download==False:
-                os.system(commande_wget)
-            else :
-                print unzipped_file_exists, options.no_download
+            #==================================download  whole product
+            if( cloud<options.max_cloud or (options.sentinel.find("S1")>=0)) and options.tile==None:
+                commande_wget='%s %s %s%s/%s "%s"'%(wg,auth,wg_opt,options.write_dir,filename+".zip",link)
+                #do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
+                unzipped_file_exists= os.path.exists(("%s/%s")%(options.write_dir,filename))
+                print commande_wget
+                if unzipped_file_exists==False and options.no_download==False:
+                    os.system(commande_wget)
+                else :
+                    print unzipped_file_exists, options.no_download
 
         # download only one tile, file by file.
         elif options.tile!=None:
@@ -434,6 +435,3 @@ for i in range(len(request_list)):
                             os.system(commande_wget)
                         download_tree(nom_rep_tuile,"granule.xml",wg,auth,wg_opt,value)
 
-
-        else :
-            print "too many clouds to download this product"
