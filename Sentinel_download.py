@@ -44,7 +44,7 @@ def download_tree(rep,xml_file,wg,auth,wg_opt,value):
 
     for i in range(len(urls)):
         if length[i]==0: # then it is a directory
-             nom_rep="%s/%s"%(rep,names[i])
+            nom_rep="%s/%s"%(rep,names[i])
             print nom_rep
             if not(os.path.exists(nom_rep)):
                 os.mkdir(nom_rep)
