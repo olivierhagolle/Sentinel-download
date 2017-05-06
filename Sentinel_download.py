@@ -114,6 +114,8 @@ else:
             help="end ingestion date, fmt('2015-12-23')",default=None)     
     parser.add_option("-d", "--start_date", dest="start_date", action="store", type="string", \
             help="start date, fmt('20151222')",default=None)
+    parser.add_option("-l", "--level", dest="level", action="store", type="string", \
+            help="L1C,L2A...",default="L1C")
     parser.add_option("-f","--end_date", dest="end_date", action="store", type="string", \
             help="end date, fmt('20151223')",default=None)
     parser.add_option("-o","--orbit", dest="orbit", action="store", type="int", \
@@ -198,7 +200,12 @@ else :
         value="\\$value"
     else:
         value="$value"
-
+producttype=None
+if options.sentinel=="S2":
+    if options.level=="L1C":
+        producttype="S2MSI1C"
+    elif  options.level=="L2A":
+        producttype="S2MSI2Ap"
 if geom=='point':
     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         query_geom='footprint:\\"Intersects(%f,%f)\\"'%(options.lat,options.lon)
@@ -233,6 +240,10 @@ if options.start_ingest_date!=None or options.end_ingest_date!=None:
     query_date=" ingestiondate:[%s TO %s]"%(start_ingest_date,end_ingest_date)
     query=query+query_date
 
+
+if producttype !=None:    
+    query_producttype=" producttype:%s "%producttype
+    query=query+query_producttype
     
 # acquisition date    
 
@@ -302,12 +313,13 @@ for i in range(len(request_list)):
             if options.dhus==True:
                 link=link.replace("apihub","dhus")
 
+               
             if options.sentinel.find("S2") >=0 :
                 for node in prod.getElementsByTagName("double"):
                     (name,field)=node.attributes.items()[0]
                     if field=="cloudcoverpercentage":
                         cloud=float((node.toxml()).split('>')[1].split('<')[0])
-                    print "cloud percentage = %5.2f %%"%cloud
+                        print "cloud percentage = %5.2f %%"%cloud
             else:
                 cloud=0
 
