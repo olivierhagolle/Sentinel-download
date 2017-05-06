@@ -41,6 +41,10 @@ Here are a few examples for Sentinel-2
 
 `python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
 
+- To download all L2A products over Toulouse 
+
+`python  Sentinel_download.py --lat 43.6 --lon 1.44 -a apihub.txt -l L2A -s S2`
+
 - To download all products over Toulouse taken from Path 51 with aria2 for windows
 
 `python  Sentinel_download.py --downloader aria2 --lat 43.6 --lon 1.44 -a apihub.txt -o 51 -s S2`
