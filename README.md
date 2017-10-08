@@ -1,4 +1,7 @@
 # Sentinel-download
+
+(I share tools I developp for my needs, these days, I am downloading data through [The French Sentinel mirror site](https://peps.cnes.fr) using another tool I developped [Peps_download](https://github.com/olivierhagolle/peps_download).
+I have therefore not much time to maintain that one. Volunteers are welcome to take over its maintenance,) 
 ### Description
 Tool to download Sentinel data from ESA (using the wget or aria2 downloaders). This tool can download whole products or only one tile per product, with the -t option (http://olivierhagolle.github.io/Sentinel-download). It should work both on windows and linux.
 
