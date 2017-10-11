@@ -313,15 +313,14 @@ for i in range(len(request_list)):
             if options.dhus==True:
                 link=link.replace("apihub","dhus")
 
-               
+            cloud=0
             if options.sentinel.find("S2") >=0 :
                 for node in prod.getElementsByTagName("double"):
                     (name,field)=node.attributes.items()[0]
                     if field=="cloudcoverpercentage":
                         cloud=float((node.toxml()).split('>')[1].split('<')[0])
                         print "cloud percentage = %5.2f %%"%cloud
-            else:
-                cloud=0
+ 
 
             print "===============================================\n"
 
