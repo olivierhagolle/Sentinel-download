@@ -273,14 +273,13 @@ else:
 
 
 #=======================
-# parse catalog output»
+# parse catalog outputÂ»
 #=======================
 for i in range(len(request_list)):
     os.system(request_list[i])
     xml=minidom.parse("query_results.xml")
     products=xml.getElementsByTagName("entry")
     for prod in products:
-        ident=prod.getElementsByTagName("id")[0].firstChild.data
         link=prod.getElementsByTagName("link")[0].attributes.items()[0][1]
         #to avoid wget to remove $ special character
         link=link.replace('$value',value)
