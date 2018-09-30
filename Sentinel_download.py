@@ -45,8 +45,6 @@ def get_elements(xml_file):
 
 def download_tree(rep, xml_file, wg, auth, wg_opt, value):
     urls, types, names, length = get_elements(xml_file)
-    # print
-    #print urls,types,names,length
 
     for i in range(len(urls)):
         if length[i] == 0:  # then it is a directory
@@ -84,9 +82,9 @@ def get_dir(dir_name, dir_url, product_dir_name, wg, auth, wg_opt, value):
 
 url_search = "https://scihub.copernicus.eu/apihub/search?q="
 
-#==================
+# ==================
 # parse command line
-#==================
+# ==================
 if len(sys.argv) == 1:
     prog = os.path.basename(sys.argv[0])
     print('      ' + sys.argv[0] + ' [options]')
@@ -144,27 +142,27 @@ else:
                       help="maximum number of records to download (default=100)", default=100)
 
     (options, args) = parser.parse_args()
-    if options.lat == None or options.lon == None:
-        if options.latmin == None or options.lonmin == None or options.latmax == None or options.lonmax == None:
+    if options.lat is None or options.lon is None:
+        if options.latmin is None or options.lonmin is None or options.latmax is None or options.lonmax is None:
             print("provide at least a point or  rectangle")
             sys.exit(-1)
         else:
             geom = 'rectangle'
     else:
-        if options.latmin == None and options.lonmin == None and options.latmax == None and options.lonmax == None:
+        if options.latmin is None and options.lonmin is None and options.latmax is None and options.lonmax is None:
             geom = 'point'
         else:
             print("please choose between point and rectance, but not both")
             sys.exit(-1)
-    if options.tile != None and options.sentinel != 'S2':
+    if options.tile is not None and options.sentinel != 'S2':
         print("The tile option (-t) can only be used for Sentinel-2")
         sys.exit(-1)
 
     parser.check_required("-a")
 
-#====================
+# ====================
 # read password file
-#====================
+# ====================
 try:
     f = open(options.apihub)
     (account, passwd) = f.readline().split(' ')
@@ -176,9 +174,9 @@ except IOError:
     sys.exit(-2)
 
 
-#==================================================
+# ==================================================
 #      prepare wget command line to search catalog
-#==================================================
+# ==================================================
 if os.path.exists('query_results.xml'):
     os.remove('query_results.xml')
 
@@ -220,29 +218,29 @@ elif geom == 'rectangle':
         query_geom = 'footprint:"Intersects(POLYGON(({lonmin} {latmin}, {lonmax} {latmin}, {lonmax} {latmax}, {lonmin} {latmax},{lonmin} {latmin})))"'.format(latmin=options.latmin, latmax=options.latmax, lonmin=options.lonmin, lonmax=options.lonmax)
 
 
-if options.orbit == None:
+if options.orbit is None:
     query = '%s filename:%s*' % (query_geom, options.sentinel)
 else:
     query = '%s filename:%s*R%03d*' % (query_geom, options.sentinel, options.orbit)
 
 
 # ingestion date
-if options.start_ingest_date != None:
+if options.start_ingest_date is not None:
     start_ingest_date = options.start_ingest_date + "T00:00:00.000Z"
 else:
     start_ingest_date = "2015-06-23T00:00:00.000Z"
 
-if options.end_ingest_date != None:
+if options.end_ingest_date is not None:
     end_ingest_date = options.end_ingest_date + "T23:59:50.000Z"
 else:
     end_ingest_date = "NOW"
 
-if options.start_ingest_date != None or options.end_ingest_date != None:
+if options.start_ingest_date is not None or options.end_ingest_date is not None:
     query_date = " ingestiondate:[%s TO %s]" % (start_ingest_date, end_ingest_date)
     query = query + query_date
 
 
-if producttype != None:
+if producttype is not None:
     query_producttype = " producttype:%s " % producttype
     query = query + query_producttype
 
@@ -273,9 +271,9 @@ else:
     request_list = [commande_wget]
 
 
-#=======================
-# parse catalog output»
-#=======================
+# =======================
+# parse catalog output
+# =======================
 for i in range(len(request_list)):
     os.system(request_list[i])
     xml = minidom.parse("query_results.xml")
@@ -285,7 +283,7 @@ for i in range(len(request_list)):
         link = list(prod.getElementsByTagName("link")[0].attributes.items())[0][1]
         # to avoid wget to remove $ special character
         link = link.replace('$value', value)
-
+        
         for node in prod.getElementsByTagName("str"):
             (name, field) = list(node.attributes.items())[0]
             if field == "filename":
@@ -304,13 +302,12 @@ for i in range(len(request_list)):
             sys.exit(-1)
 
         if date_prod >= start_date and date_prod <= end_date:
-
             # print what has been found
             print("\n===============================================")
             print(date_prod, start_date, end_date)
             print(filename)
             print(link)
-            if options.dhus == True:
+            if options.dhus is True:
                 link = link.replace("apihub", "dhus")
 
             if options.sentinel.find("S2") >= 0:
@@ -324,19 +321,19 @@ for i in range(len(request_list)):
 
             print("===============================================\n")
 
-            #==================================download  whole product
-            if(cloud < options.max_cloud or (options.sentinel.find("S1") >= 0)) and options.tile == None:
+            # ==================================download  whole product
+            if(cloud < options.max_cloud or (options.sentinel.find("S1") >= 0)) and options.tile is None:
                 commande_wget = '%s %s %s%s/%s "%s"' % (wg, auth, wg_opt, options.write_dir, filename + ".zip", link)
                 # do not download the product if it was already downloaded and unzipped, or if no_download option was selected.
                 unzipped_file_exists = os.path.exists(("%s/%s") % (options.write_dir, filename))
                 print(commande_wget)
-                if unzipped_file_exists == False and options.no_download == False:
+                if unzipped_file_exists is False and options.no_download is False:
                     os.system(commande_wget)
                 else:
                     print(unzipped_file_exists, options.no_download)
 
         # download only one tile, file by file.
-            elif options.tile != None:
+            elif options.tile is not None:
                 # do not download the product if the tile is already downloaded.
                 unzipped_tile_exists = False
                 if os.path.exists(("%s/%s") % (options.write_dir, filename)):
@@ -379,7 +376,7 @@ for i in range(len(request_list)):
                     for i in range(len(urls)):
                         if names[i].find(options.tile) > 0:
                             granule = names[i]
-                    if granule == None:
+                    if granule is None:
                         print("========================================================================")
                         print("Tile %s is not available within product (check coordinates or tile name)" % options.tile)
                         print("========================================================================")
